@@ -17,10 +17,10 @@
     --popover: 0 0% 100%;
     --popover-foreground: 220 26% 14%;
 
-    /* Sapphire blue primary - elegant and premium */
-    --primary: 220 91% 24%;
-    --primary-light: 220 91% 45%;
-    --primary-foreground: 0 0% 100%;
+    /* Yellow primary - bright and energetic */
+    --primary: 45 93% 58%;
+    --primary-light: 45 93% 68%;
+    --primary-foreground: 0 0% 0%;
 
     /* Gold accent system */
     --gold: 45 93% 58%;
@@ -49,8 +49,8 @@
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-light)));
     --gradient-gold: linear-gradient(135deg, hsl(var(--gold-dark)), hsl(var(--gold-light)));
-    --gradient-hero: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(220 91% 35%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(220 14% 98%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(45 93% 48%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(45 14% 98%) 100%);
 
     /* Shadows */
     --shadow-elegant: 0 10px 30px -10px hsl(var(--primary) / 0.3);

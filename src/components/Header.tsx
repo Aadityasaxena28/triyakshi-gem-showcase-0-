@@ -6,10 +6,10 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const menuItems = [
-    "Health Calculator",
-    "Gemstone Calculator", 
-    "Lucky Store",
-    "Rudraksh"
+    { name: "Health Calculator", path: "/health-calculator" },
+    { name: "Gemstone Calculator", path: "/gemstone-calculator" }, 
+    { name: "Lucky Store", path: "/lucky-store" },
+    { name: "Rudraksh", path: "/rudraksh" }
   ];
 
   return (
@@ -19,7 +19,7 @@ const Header = () => {
           {/* Logo */}
           <div className="flex items-center space-x-2">
             <div className="bg-gradient-primary p-2 rounded-xl shadow-elegant">
-              <Gem className="h-6 w-6 text-white" />
+              <Gem className="h-4 w-4 text-white" />
             </div>
             <span className="text-xl font-bold text-gradient">
               Triyakshi Gems
@@ -30,11 +30,11 @@ const Header = () => {
           <nav className="hidden md:flex items-center space-x-8">
             {menuItems.map((item) => (
               <a
-                key={item}
-                href="#"
+                key={item.name}
+                href={item.path}
                 className="text-foreground hover:text-primary transition-smooth link-animated py-2 font-medium"
               >
-                {item}
+                {item.name}
               </a>
             ))}
           </nav>
@@ -55,9 +55,9 @@ const Header = () => {
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             {isMenuOpen ? (
-              <X className="h-6 w-6 text-foreground" />
+              <X className="h-4 w-4 text-foreground" />
             ) : (
-              <Menu className="h-6 w-6 text-foreground" />
+              <Menu className="h-4 w-4 text-foreground" />
             )}
           </button>
         </div>
@@ -68,11 +68,11 @@ const Header = () => {
             <nav className="flex flex-col space-y-3">
               {menuItems.map((item) => (
                 <a
-                  key={item}
-                  href="#"
+                  key={item.name}
+                  href={item.path}
                   className="text-foreground hover:text-primary transition-smooth py-2 px-4 rounded-lg hover:bg-secondary"
                 >
-                  {item}
+                  {item.name}
                 </a>
               ))}
               <div className="flex flex-col space-y-2 pt-4 border-t border-border/20">

@@ -33,22 +33,6 @@ const Testimonials = () => {
       rating: 5,
       review: "Excellent customer service and authentic products. The lucky charms I bought have definitely improved my business prospects!",
       avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face"
-    },
-    {
-      id: 5,
-      name: "Kavya Nair",
-      location: "Kochi, India",
-      rating: 5,
-      review: "The rose quartz pendant is beautiful and the healing properties are genuine. I feel more balanced and at peace. Thank you Triyakshi Gems!",
-      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=face"
-    },
-    {
-      id: 6,
-      name: "Vikram Singh",
-      location: "Jaipur, India", 
-      rating: 5,
-      review: "Fast delivery, secure packaging, and genuine gemstones. The emerald I ordered matches perfectly with my birth chart recommendations.",
-      avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face"
     }
   ];
 
