@@ -9,7 +9,7 @@ const Hero = () => {
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: `linear-gradient(135deg, rgba(34, 57, 152, 0.8), rgba(34, 57, 152, 0.6)), url(${heroImage})`
+          backgroundImage: `linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05)), url(${heroImage})`
         }}
       />
 

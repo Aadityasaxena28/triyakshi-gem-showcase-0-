@@ -1,5 +1,6 @@
 import Header from "@/components/Header";
 import TopSlider from "@/components/TopSlider";
+import Marquee from "@/components/Marquee";
 import Hero from "@/components/Hero";
 import Categories from "@/components/Categories";
 import NewCategories from "@/components/NewCategories";
@@ -12,6 +13,7 @@ const Index = () => {
     <div className="min-h-screen bg-white">
       <Header />
       <TopSlider />
+      <Marquee />
       <Hero />
       <Categories />
       <NewCategories />

@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, Briefcase, GraduationCap, Heart, Shield } from "lucide-react";
+import { ChevronLeft, ChevronRight, Briefcase, GraduationCap, Heart, Shield, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const NewCategories = () => {
   const [activeCategory, setActiveCategory] = useState(0);
@@ -9,6 +10,12 @@ const NewCategories = () => {
     education: 0,
     loveLife: 0,
     health: 0
+  });
+  const [priceFilters, setPriceFilters] = useState({
+    career: "all",
+    education: "all",
+    loveLife: "all",
+    health: "all"
   });
 
   const categories = [
@@ -74,6 +81,29 @@ const NewCategories = () => {
     }));
   };
 
+  const handlePriceFilter = (categoryId: string, filter: string) => {
+    setPriceFilters(prev => ({
+      ...prev,
+      [categoryId]: filter
+    }));
+  };
+
+  const getFilteredProducts = (categoryId: string, products: any[]) => {
+    const filter = priceFilters[categoryId as keyof typeof priceFilters];
+    if (filter === "all") return products;
+    
+    switch (filter) {
+      case "under-500":
+        return products.filter(p => p.price < 500);
+      case "500-700":
+        return products.filter(p => p.price >= 500 && p.price <= 700);
+      case "above-700":
+        return products.filter(p => p.price > 700);
+      default:
+        return products;
+    }
+  };
+
   return (
     <section className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -116,28 +146,48 @@ const NewCategories = () => {
               activeCategory === categoryIndex ? 'block' : 'hidden'
             }`}
           >
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 space-y-4 sm:space-y-0">
               <h3 className="text-2xl font-bold text-foreground">
                 {category.name} Gemstones
               </h3>
               
-              <div className="flex space-x-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => handleSlideChange(category.id, 'prev')}
-                  className="rounded-full"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => handleSlideChange(category.id, 'next')}
-                  className="rounded-full"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <Filter className="h-4 w-4 text-muted-foreground" />
+                  <Select 
+                    value={priceFilters[category.id as keyof typeof priceFilters]} 
+                    onValueChange={(value) => handlePriceFilter(category.id, value)}
+                  >
+                    <SelectTrigger className="w-40">
+                      <SelectValue placeholder="Filter by price" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Prices</SelectItem>
+                      <SelectItem value="under-500">Under ₹500</SelectItem>
+                      <SelectItem value="500-700">₹500 - ₹700</SelectItem>
+                      <SelectItem value="above-700">Above ₹700</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="flex space-x-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleSlideChange(category.id, 'prev')}
+                    className="rounded-full"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleSlideChange(category.id, 'next')}
+                    className="rounded-full"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
 
@@ -148,7 +198,7 @@ const NewCategories = () => {
                   transform: `translateX(-${currentSlides[category.id as keyof typeof currentSlides] * (100 / 3)}%)` 
                 }}
               >
-                {category.products.map((product, productIndex) => (
+                {getFilteredProducts(category.id, category.products).map((product, productIndex) => (
                   <div
                     key={productIndex}
                     className="flex-none w-full md:w-1/2 lg:w-1/3 px-4"
