@@ -1,0 +1,236 @@
+import { getProducts } from "@/API/Product";
+import { Product } from '@/DataTypes/product';
+import { useQuery } from "@tanstack/react-query";
+import { Eye, Search, Star } from 'lucide-react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+// Sample product data
+const productsData = {
+  precious: {
+    moonga: [
+      { id: 'MNG001', name: 'Premium Red Coral', quantity: '5.25 Ratti', description: 'Natural Italian Red Coral with excellent clarity', price: 12500, originalPrice: 15000 },
+      { id: 'MNG002', name: 'Italian Moonga Stone', quantity: '7.5 Ratti', description: 'Deep red coral from Mediterranean sea', price: 18750, originalPrice: 22000 }
+    ],
+    heera: [
+      { id: 'HRA001', name: 'Brilliant Cut Diamond', quantity: '0.50 Carat', description: 'VS1 clarity, F color certified diamond', price: 85000, originalPrice: 95000 },
+      { id: 'HRA002', name: 'Round Diamond', quantity: '0.75 Carat', description: 'VVS2 clarity, excellent cut and polish', price: 125000, originalPrice: 140000 }
+    ],
+    panna: [
+      { id: 'PNA001', name: 'Colombian Emerald', quantity: '4.25 Ratti', description: 'Natural emerald with vivid green color', price: 32000, originalPrice: 38000 },
+      { id: 'PNA002', name: 'Zambian Panna', quantity: '6.0 Ratti', description: 'Premium quality with minor inclusions', price: 45000, originalPrice: 52000 }
+    ],
+    moti: [
+      { id: 'MTI001', name: 'South Sea Pearl', quantity: '8-9mm', description: 'Natural pearl with excellent luster', price: 8500, originalPrice: 10000 },
+      { id: 'MTI002', name: 'Basra Moti', quantity: '10-11mm', description: 'Rare natural pearl, certified authentic', price: 25000, originalPrice: 30000 }
+    ],
+    manik: [
+      { id: 'MNK001', name: 'Burmese Ruby', quantity: '5.5 Ratti', description: 'Pigeon blood red ruby with certification', price: 75000, originalPrice: 85000 },
+      { id: 'MNK002', name: 'Madagascar Manik', quantity: '4.0 Ratti', description: 'Natural ruby with excellent color', price: 48000, originalPrice: 55000 }
+    ],
+    pukhraj: [
+      { id: 'PKJ001', name: 'Ceylon Yellow Sapphire', quantity: '6.25 Ratti', description: 'Natural unheated yellow sapphire', price: 42000, originalPrice: 48000 },
+      { id: 'PKJ002', name: 'Thai Pukhraj', quantity: '7.5 Ratti', description: 'Premium quality with excellent clarity', price: 52500, originalPrice: 60000 }
+    ],
+    neelam: [
+      { id: 'NLM001', name: 'Kashmir Blue Sapphire', quantity: '5.0 Ratti', description: 'Rare cornflower blue sapphire', price: 95000, originalPrice: 110000 },
+      { id: 'NLM002', name: 'Ceylon Neelam', quantity: '6.5 Ratti', description: 'Natural blue sapphire, certified', price: 68000, originalPrice: 78000 }
+    ],
+    gomed: [
+      { id: 'GMD001', name: 'Hessonite Garnet', quantity: '7.25 Ratti', description: 'Natural Ceylon Gomed with honey color', price: 5500, originalPrice: 7000 },
+      { id: 'GMD002', name: 'African Gomed', quantity: '9.0 Ratti', description: 'Deep orange-red hessonite', price: 7200, originalPrice: 9000 }
+    ],
+    vaidurya: [
+      { id: 'VDR001', name: "Cat's Eye Chrysoberyl", quantity: '5.5 Ratti', description: 'Sharp chatoyancy effect, honey color', price: 35000, originalPrice: 42000 },
+      { id: 'VDR002', name: 'Lahsuniya Stone', quantity: '6.75 Ratti', description: 'Premium quality with excellent eye', price: 45000, originalPrice: 52000 }
+    ]
+  },
+  semiPrecious: {
+    sulemani: [
+      { id: 'SLM001', name: 'Sulemani Hakik', quantity: '8.0 Ratti', description: 'Natural banded agate with unique patterns', price: 2500, originalPrice: 3200 },
+      { id: 'SLM002', name: 'Black Agate Stone', quantity: '10.0 Ratti', description: 'Premium quality Sulemani stone', price: 3200, originalPrice: 4000 }
+    ],
+    safedPukhraj: [
+      { id: 'SPK001', name: 'White Sapphire', quantity: '5.25 Ratti', description: 'Natural colorless sapphire', price: 8500, originalPrice: 10500 },
+      { id: 'SPK002', name: 'Ceylon White Pukhraj', quantity: '6.5 Ratti', description: 'Excellent clarity and brilliance', price: 11000, originalPrice: 13500 }
+    ],
+    haritTurmali: [
+      { id: 'HTR001', name: 'Green Tourmaline', quantity: '4.5 Ratti', description: 'Natural green tourmaline with vibrancy', price: 15000, originalPrice: 18000 },
+      { id: 'HTR002', name: 'Afghan Harit Turmali', quantity: '5.75 Ratti', description: 'Premium chrome tourmaline', price: 22000, originalPrice: 26000 }
+    ],
+    chandrakant: [
+      { id: 'CHK001', name: 'Moonstone', quantity: '7.0 Ratti', description: 'Natural moonstone with blue sheen', price: 4500, originalPrice: 6000 },
+      { id: 'CHK002', name: 'Rainbow Chandrakant', quantity: '8.5 Ratti', description: 'Multi-color adularescence effect', price: 6500, originalPrice: 8000 }
+    ],
+    gomedak: [
+      { id: 'GMK001', name: 'Hessonite Upratna', quantity: '8.0 Ratti', description: 'Natural garnet with warm tones', price: 3500, originalPrice: 4500 },
+      { id: 'GMK002', name: 'Orange Gomedak', quantity: '10.0 Ratti', description: 'Bright orange hessonite garnet', price: 4800, originalPrice: 6000 }
+    ],
+    sunehla: [
+      { id: 'SNH001', name: 'Golden Topaz', quantity: '6.25 Ratti', description: 'Natural yellow topaz with brilliance', price: 5500, originalPrice: 7000 },
+      { id: 'SNH002', name: 'Imperial Sunehla', quantity: '7.5 Ratti', description: 'Premium golden-orange topaz', price: 8500, originalPrice: 10500 }
+    ],
+    jamuniya: [
+      { id: 'JMN001', name: 'Amethyst', quantity: '9.0 Ratti', description: 'Deep purple amethyst from Brazil', price: 3200, originalPrice: 4200 },
+      { id: 'JMN002', name: 'Zambian Jamuniya', quantity: '11.0 Ratti', description: 'Rich violet amethyst stone', price: 4500, originalPrice: 5800 }
+    ],
+    santreeGomed: [
+      { id: 'STG001', name: 'Spessartite Garnet', quantity: '5.5 Ratti', description: 'Orange-red garnet with fire', price: 12000, originalPrice: 15000 },
+      { id: 'STG002', name: 'Mandarin Santree', quantity: '6.0 Ratti', description: 'Vibrant orange spessartite', price: 16000, originalPrice: 19500 }
+    ],
+    vaiduryaUpratna: [
+      { id: 'VDU001', name: "Cat's Eye Quartz", quantity: '7.5 Ratti', description: 'Natural chatoyant quartz', price: 5500, originalPrice: 7200 },
+      { id: 'VDU002', name: 'Fiber Optic Stone', quantity: '9.0 Ratti', description: 'Strong cat eye effect', price: 7500, originalPrice: 9500 }
+    ]
+  }
+};
+
+
+
+
+const GemstonesPage = () => {
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedSubcategory, setSelectedSubcategory] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [page, setPage] = useState(1);
+  const [productCount] = useState(40);
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+
+  const navigate = useNavigate();
+
+  // ------------------ TanStack Query ------------------
+  const { data: products = [], isLoading, isError } = useQuery({
+    queryKey: ["products", selectedCategory, page, productCount],
+    queryFn: () =>
+      getProducts({
+        page,
+        category: selectedSubcategory !== "all" ? selectedSubcategory : selectedCategory,
+        productCount,
+      }),
+    keepPreviousData: true,
+    staleTime: 1000 * 60 * 2,
+  });
+
+  // ------------------ Filter search locally ------------------
+  const filteredProducts = searchQuery
+    ? products.filter(
+        (product) =>
+          product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          product.id.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : products;
+
+  // ------------------ Categories ------------------
+  const categories = {
+    precious: {
+      label: "Precious (Ratna)",
+      subcategories: {
+        moonga: "Moonga",
+        heera: "Heera",
+        panna: "Panna",
+        moti: "Moti",
+        manik: "Manik",
+        pukhraj: "Pukhraj",
+        neelam: "Neelam",
+        gomed: "Gomed",
+        vaidurya: "Vaidurya/Lahsuniya",
+      },
+    },
+    semiPrecious: {
+      label: "Semi-Precious (Upratna)",
+      subcategories: {
+        sulemani: "Sulemani",
+        safedPukhraj: "Safed Pukhraj",
+        haritTurmali: "Harit Turmali",
+        chandrakant: "Chandrakant Mani",
+        gomedak: "Gomedak",
+        sunehla: "Sunehla",
+        jamuniya: "Jamuniya",
+        santreeGomed: "Santree Gomed",
+        vaiduryaUpratna: "Vaidurya Uparatna",
+      },
+    },
+  };
+  // const discountedPrice = product.price*(1-(0.01*product.discount))
+  const handleViewDetails = (id: string) => {
+    navigate(`/product-view/${id}`);
+  };
+
+  // ------------------ Product Card ------------------
+  const ProductCard = ({ product }: { product: Product }) => {
+    const categoryLabel = product.type.includes("precious") ? "Precious" : "Semi-Precious";
+    const discount = Math.round(((product.price - product.price) / (product.price || 1)) * 100);
+
+    return (
+      <div className="bg-white rounded-2xl shadow-card hover:shadow-elegant transition-all duration-300 hover:scale-105 overflow-hidden group">
+        <div className="h-48 bg-gradient-to-br from-yellow-50 to-yellow-100 flex items-center justify-center relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/20 to-yellow-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <Star className="w-24 h-24 text-yellow-400/40" />
+          {discount > 0 && (
+            <div className="absolute top-3 right-3 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+              {discount}% OFF
+            </div>
+          )}
+        </div>
+        <div className="p-6">
+          <div className="flex items-start justify-between mb-2">
+            <h3 className="text-xl font-bold text-gray-800">{product.name}</h3>
+            <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full font-semibold">
+              {product.id}
+            </span>
+          </div>
+          <p className="text-sm text-gray-600 mb-3">{product.description}</p>
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-sm font-semibold text-gray-700">Quantity:</span>
+            <span className="text-sm text-gray-600">{product.quantity}</span>
+          </div>
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-xs bg-gray-100 text-gray-700 px-3 py-1 rounded-full">{categoryLabel}</span>
+          </div>
+          <div className="flex items-end gap-2 mb-4">
+            <span className="text-2xl font-bold text-gray-900">₹{product.price*(1-(0.01*product.discount)).toLocaleString()}</span>
+            {product.discount && product.price > product.price*(1-(0.01*product.discount)) && (
+              <span className="text-lg text-gray-400 line-through">₹{product.price.toLocaleString()}</span>
+            )}
+          </div>
+          <button
+            className="w-full bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 font-semibold py-3 px-4 rounded-xl hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 flex items-center justify-center gap-2 group"
+            onClick={() => handleViewDetails(product.id)}
+          >
+            <Eye className="w-5 h-5" />
+            View Details
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header, Filters and Sidebar code remain same */}
+
+      <main className="flex-1">
+        {isLoading && <p>Loading products...</p>}
+        {isError && <p className="text-red-500">Failed to fetch products!</p>}
+
+        {filteredProducts.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {filteredProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-16">
+            <div className="text-gray-400 mb-4">
+              <Search className="w-16 h-16 mx-auto" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">No products found</h3>
+            <p className="text-gray-500">Try adjusting your filters or search query</p>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+};
+
+export default GemstonesPage;

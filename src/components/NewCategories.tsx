@@ -17,6 +17,7 @@ const NewCategories = () => {
     loveLife: "all",
     health: "all"
   });
+  
 
   const categories = [
     {

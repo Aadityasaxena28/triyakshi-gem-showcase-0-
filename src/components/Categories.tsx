@@ -1,9 +1,10 @@
-import { Calculator, Gem, Heart, ShoppingBag } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import gemstonesImg from "@/assets/gemstones-category.jpg";
-import rudrakshImg from "@/assets/rudraksha-category.jpg"; 
-import luckyStoreImg from "@/assets/lucky-store-category.jpg";
 import healthCalculatorImg from "@/assets/health-calculator-category.jpg";
+import luckyStoreImg from "@/assets/lucky-store-category.jpg";
+import rudrakshImg from "@/assets/rudraksha-category.jpg";
+import { Button } from "@/components/ui/button";
+import { Calculator, Gem, Heart, ShoppingBag } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Categories = () => {
   const categories = [
@@ -36,7 +37,20 @@ const Categories = () => {
       color: "from-primary to-primary-light"
     }
   ];
+  const Navigate = useNavigate();
+  const HandleNavigation = (category: string) => {
+    return () => {
+      const formattedCategory = category.toLowerCase().replace(/\s+/g, '-');
+      if (formattedCategory === "gemstones") {
+        Navigate(`/products`);
+      }
+      else{
 
+        Navigate(`/#`);
+      }
+    };
+    
+  }
   return (
     <section className="py-20 bg-gradient-to-br from-secondary/30 to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -78,7 +92,8 @@ const Categories = () => {
                   
                   {/* Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl flex items-end justify-center pb-4">
-                    <Button size="sm" className="btn-hero opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
+                    <Button size="sm" className="btn-hero opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0"
+                    onClick={HandleNavigation(category.title)}>
                       Explore
                     </Button>
                   </div>
