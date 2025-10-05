@@ -15,7 +15,7 @@ type GetProductsParams = {
 export async function getProducts({page=0,category="all", productCount=40}:GetProductsParams):Promise<Product[]>{
 
   try {
-    const { data } = await api.get<RawProduct[]>(`/products/products`,{
+    const { data } = await api.get<RawProduct[]>(`/api/products/products`,{
       params:{
         page,
         category,
@@ -26,13 +26,26 @@ export async function getProducts({page=0,category="all", productCount=40}:GetPr
       throw new Error("Failed to fetch products");
     }
     // const products:RawProduct[]= data.products;
-    console.log(data.data);
+    // console.log(data.data);
     return data.data.map(toProduct);
   } catch (error) {
     throw new Error("Failed to fetch products" + error);
   }
 }
-
+export async function getProductById(id: string):Promise<Product> {
+  try{ 
+    console.log("Fetching product with ID:", id);
+    const {data} = await api.get<RawProduct>(`/api/products/products/${id}`);
+    if(!data.isOkay){
+      throw new Error("Failed to fetch product by ID");
+    }
+    console.log(data.data);
+    return toProduct(data.data);
+  } 
+  catch (error) {
+    throw new Error("Failed to fetch product by ID" + error);
+  } 
+}
 
 
 
@@ -116,20 +129,4 @@ const productsData = {
   }
 };
 
-export async function getProductById(id: string):Promise<Product | null> {
-  return new Promise((resolve) => {
-    const product = Object.values(productsData).flatMap(category => Object.values(category).flat()).find(p => p.id === id);
-    resolve(product ? toProduct({ 
-      _id: product.id,
-      name: product.name,
-      quantity: product.quantity,
-      description: product.description,
-      price: product.price,
-      discount: Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100),
-      image: "", // Provide a default or placeholder value
-      availability: "available", // Provide a default or placeholder value
-      category: "unknown", // Provide a default or placeholder value
-      created_at: new Date().toISOString(), // Provide a default or placeholder value
-      weight: 0 // Provide a default or placeholder value
-    }) : null);    
-})}
+

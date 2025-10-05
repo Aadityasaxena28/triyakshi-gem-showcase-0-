@@ -1,8 +1,8 @@
 import { getProducts } from "@/API/Product";
 import { Product } from '@/DataTypes/product';
 import { useQuery } from "@tanstack/react-query";
-import { Eye, Search, Star } from 'lucide-react';
-import { useState } from 'react';
+import { Eye, Filter, Search, Star } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 // Sample product data
 const productsData = {
@@ -96,20 +96,28 @@ const GemstonesPage = () => {
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
 
   const navigate = useNavigate();
-
+  const baseUrl = import.meta.env.VITE_api_url || "http://localhost:5000";
+// --- add this memo so the key & queryFn stay in sync ---
+  const effectiveCategory = useMemo(
+    () => (selectedSubcategory !== "all" ? selectedSubcategory : selectedCategory),
+    [selectedCategory, selectedSubcategory]
+  );
   // ------------------ TanStack Query ------------------
   const { data: products = [], isLoading, isError } = useQuery({
-    queryKey: ["products", selectedCategory, page, productCount],
+    queryKey: ["products", effectiveCategory, page, productCount],
     queryFn: () =>
       getProducts({
         page,
-        category: selectedSubcategory !== "all" ? selectedSubcategory : selectedCategory,
+        category:effectiveCategory === "all" ? undefined : effectiveCategory,
         productCount,
       }),
     keepPreviousData: true,
     staleTime: 1000 * 60 * 2,
   });
-
+  useEffect(() => {
+    setPage(1);
+    console.log(effectiveCategory);
+  }, [effectiveCategory]);
   // ------------------ Filter search locally ------------------
   const filteredProducts = searchQuery
     ? products.filter(
@@ -165,13 +173,24 @@ const GemstonesPage = () => {
       <div className="bg-white rounded-2xl shadow-card hover:shadow-elegant transition-all duration-300 hover:scale-105 overflow-hidden group">
         <div className="h-48 bg-gradient-to-br from-yellow-50 to-yellow-100 flex items-center justify-center relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/20 to-yellow-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          <Star className="w-24 h-24 text-yellow-400/40" />
+
+          {product.image ? (
+            <img
+              src={`http://localhost:5000${product.image}`} // adjust BaseUrl if needed
+              alt={product.name}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <Star className="w-24 h-24 text-yellow-400/40" />
+          )}
+
           {discount > 0 && (
             <div className="absolute top-3 right-3 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
               {discount}% OFF
             </div>
           )}
         </div>
+
         <div className="p-6">
           <div className="flex items-start justify-between mb-2">
             <h3 className="text-xl font-bold text-gray-800">{product.name}</h3>
@@ -207,8 +226,104 @@ const GemstonesPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header, Filters and Sidebar code remain same */}
+      <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-white py-8 px-6 shadow-lg">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-4xl font-bold mb-2">Gemstones Collection</h1>
+          <p className="text-yellow-50">Discover our exquisite collection of precious and semi-precious gemstones</p>
+        </div>
+      </div>
 
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className="flex gap-8">
+          {/* Sidebar Filter */}
+          <aside className={`${mobileFilterOpen ? 'block' : 'hidden'} lg:block w-full lg:w-80 bg-white rounded-2xl shadow-card p-6 h-fit sticky top-8`}>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                <Filter className="w-6 h-6 text-yellow-500" />
+                Filters
+              </h2>
+              <button 
+                className="lg:hidden text-gray-500"
+                onClick={() => setMobileFilterOpen(false)}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Search */}
+            <div className="mb-6">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder="Search gemstones..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none"
+                />
+              </div>
+            </div>
+
+            {/* All Gemstones */}
+            <div className="mb-6">
+              <button
+                onClick={() => {
+                  setSelectedCategory('all');
+                  setSelectedSubcategory('all');
+                  setPage(1);
+                }}
+                className={`w-full text-left px-4 py-3 rounded-xl font-semibold transition-all ${
+                  selectedCategory === 'all'
+                    ? 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-white shadow-lg'
+                    : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                All Gemstones
+              </button>
+            </div>
+
+            {/* Categories */}
+            {Object.entries(categories).map(([categoryKey, category]) => (
+              <div key={categoryKey} className="mb-6">
+                <button
+                  onClick={() => {
+                    setSelectedCategory(categoryKey);
+                    setSelectedSubcategory('all');
+                    setPage(1);
+                  }}
+                  className={`w-full text-left px-4 py-3 rounded-xl font-semibold transition-all mb-2 ${
+                    selectedCategory === categoryKey && selectedSubcategory === 'all'
+                      ? 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-white shadow-lg'
+                      : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  {category.label}
+                </button>
+                
+                {/* Subcategories */}
+                <div className="ml-4 mt-2 space-y-1">
+                  {Object.entries(category.subcategories).map(([subKey, subLabel]) => (
+                    <button
+                      key={subKey}
+                      onClick={() => {
+                        setSelectedCategory(categoryKey);
+                        setSelectedSubcategory(subKey);
+                        setPage(1);
+                      }}
+                      className={`w-full text-left px-4 py-2 rounded-lg text-sm transition-all ${
+                        selectedCategory === categoryKey && selectedSubcategory === subKey
+                          ? 'bg-yellow-100 text-yellow-800 font-semibold'
+                          : 'text-gray-600 hover:bg-gray-50'
+                      }`}
+                    >
+                      {subLabel}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </aside>
+      
       <main className="flex-1">
         {isLoading && <p>Loading products...</p>}
         {isError && <p className="text-red-500">Failed to fetch products!</p>}
@@ -229,6 +344,8 @@ const GemstonesPage = () => {
           </div>
         )}
       </main>
+      </div>
+      </div>
     </div>
   );
 };

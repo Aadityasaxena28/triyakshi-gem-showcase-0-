@@ -121,14 +121,17 @@ const ProductDetailView = () => {
   const [discount, setDiscount] = React.useState(0);
   const [discountedPrice, setDiscountedPrice] = React.useState(0);
   const [totalPrice, setTotalPrice] = React.useState(0);
-
+  const baseUrl = import.meta.env.VITE_api_url;
   useEffect(() => {
+    
     const fetchProduct = async () => {
+      // console.log('Fetching product with ID:', params.id);
       const fetchedProduct = await getProductById(params.id || 'MTI001');
       console.log('Fetched product:', fetchedProduct);
 
       setProduct(fetchedProduct);
-      setQuantity(Number(fetchedProduct.quantity) || 1);
+      // setQuantity(Number(fetchedProduct.quantity) || 1);
+
       setDiscount(fetchedProduct.discount ?? 0);
 
       const discPrice =
@@ -198,6 +201,7 @@ const ProductDetailView = () => {
           {/* Left Column - Image and 360 View */}
           <div className="space-y-6">
             {/* Main Image */}
+            {/* Main Image */}
             <div className="bg-white rounded-2xl shadow-card overflow-hidden">
               <div className="relative h-96 bg-gradient-to-br from-yellow-50 to-yellow-100 flex items-center justify-center">
                 {discount > 0 && (
@@ -207,10 +211,20 @@ const ProductDetailView = () => {
                 )}
                 <div className="relative">
                   <div className="absolute inset-0 bg-yellow-400/30 blur-3xl rounded-full"></div>
-                  <Star className="w-64 h-64 text-yellow-400 relative z-10" />
+
+                  {product.image ? (
+                    <img
+                      src={`${baseUrl}${product.image}`}
+                      alt={product.name}
+                      className="h-80 w-auto object-contain relative z-10 rounded-sm"
+                    />
+                  ) : (
+                    <Star className="w-64 h-64 text-yellow-400 relative z-10" />
+                  )}
                 </div>
               </div>
             </div>
+
 
             {/* 360 Stone View */}
             <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl shadow-card p-8">
@@ -280,7 +294,7 @@ const ProductDetailView = () => {
                   {quantity}
                 </span>
                 <button
-                  onClick={() => setQuantity(quantity + 1)}
+                  onClick={() => setQuantity(Math.min(product.quantity,quantity + 1))}
                   className="w-12 h-12 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
                 >
                   <Plus className="w-5 h-5 text-gray-700" />
