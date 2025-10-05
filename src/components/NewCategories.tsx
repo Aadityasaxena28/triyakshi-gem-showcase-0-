@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { ChevronLeft, ChevronRight, Briefcase, GraduationCap, Heart, Shield, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Briefcase, ChevronLeft, ChevronRight, CreditCard, Filter, GraduationCap, Heart, Shield, ShoppingCart } from "lucide-react";
+import { useState } from "react";
 
 const NewCategories = () => {
   const [activeCategory, setActiveCategory] = useState(0);
@@ -17,7 +17,6 @@ const NewCategories = () => {
     loveLife: "all",
     health: "all"
   });
-  
 
   const categories = [
     {
@@ -70,29 +69,29 @@ const NewCategories = () => {
     }
   ];
 
-  const handleSlideChange = (categoryId: string, direction: 'next' | 'prev') => {
+  const handleSlideChange = (categoryId, direction) => {
     const category = categories.find(cat => cat.id === categoryId);
     if (!category) return;
 
     setCurrentSlides(prev => ({
       ...prev,
-      [categoryId]: direction === 'next' 
-        ? (prev[categoryId as keyof typeof prev] + 1) % Math.max(1, category.products.length - 2)
-        : (prev[categoryId as keyof typeof prev] - 1 + Math.max(1, category.products.length - 2)) % Math.max(1, category.products.length - 2)
+      [categoryId]: direction === 'next'
+        ? (prev[categoryId] + 1) % Math.max(1, category.products.length - 2)
+        : (prev[categoryId] - 1 + Math.max(1, category.products.length - 2)) % Math.max(1, category.products.length - 2)
     }));
   };
 
-  const handlePriceFilter = (categoryId: string, filter: string) => {
+  const handlePriceFilter = (categoryId, filter) => {
     setPriceFilters(prev => ({
       ...prev,
       [categoryId]: filter
     }));
   };
 
-  const getFilteredProducts = (categoryId: string, products: any[]) => {
-    const filter = priceFilters[categoryId as keyof typeof priceFilters];
+  const getFilteredProducts = (categoryId, products) => {
+    const filter = priceFilters[categoryId];
     if (filter === "all") return products;
-    
+
     switch (filter) {
       case "under-500":
         return products.filter(p => p.price < 500);
@@ -108,7 +107,6 @@ const NewCategories = () => {
   return (
     <section className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
         <div className="text-center mb-12">
           <h2 className="text-4xl md:text-5xl font-bold text-gradient mb-4">
             Shop by Life Area
@@ -118,7 +116,6 @@ const NewCategories = () => {
           </p>
         </div>
 
-        {/* Category Tabs */}
         <div className="flex flex-wrap justify-center gap-4 mb-12">
           {categories.map((category, index) => {
             const Icon = category.icon;
@@ -126,11 +123,10 @@ const NewCategories = () => {
               <button
                 key={category.id}
                 onClick={() => setActiveCategory(index)}
-                className={`flex items-center space-x-2 px-6 py-3 rounded-xl transition-all duration-300 ${
-                  activeCategory === index
-                    ? `bg-gradient-to-r ${category.color} text-white shadow-elegant`
-                    : 'bg-white border border-border hover:shadow-card'
-                }`}
+                className={`flex items-center space-x-2 px-6 py-3 rounded-xl transition-all duration-300 ${activeCategory === index
+                  ? `bg-gradient-to-r ${category.color} text-white shadow-elegant`
+                  : 'bg-white border border-border hover:shadow-card'
+                  }`}
               >
                 <Icon className="h-4 w-4" />
                 <span className="font-medium">{category.name}</span>
@@ -139,26 +135,14 @@ const NewCategories = () => {
           })}
         </div>
 
-        {/* Active Category Products */}
         {categories.map((category, categoryIndex) => (
-          <div
-            key={category.id}
-            className={`transition-all duration-500 ${
-              activeCategory === categoryIndex ? 'block' : 'hidden'
-            }`}
-          >
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 space-y-4 sm:space-y-0">
-              <h3 className="text-2xl font-bold text-foreground">
-                {category.name} Gemstones
-              </h3>
-              
+          <div key={category.id} className={`${activeCategory === categoryIndex ? 'block' : 'hidden'}`}>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8">
+              <h3 className="text-2xl font-bold text-foreground">{category.name} Gemstones</h3>
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-2">
                   <Filter className="h-4 w-4 text-muted-foreground" />
-                  <Select 
-                    value={priceFilters[category.id as keyof typeof priceFilters]} 
-                    onValueChange={(value) => handlePriceFilter(category.id, value)}
-                  >
+                  <Select value={priceFilters[category.id]} onValueChange={(value) => handlePriceFilter(category.id, value)}>
                     <SelectTrigger className="w-40">
                       <SelectValue placeholder="Filter by price" />
                     </SelectTrigger>
@@ -170,22 +154,11 @@ const NewCategories = () => {
                     </SelectContent>
                   </Select>
                 </div>
-                
                 <div className="flex space-x-2">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => handleSlideChange(category.id, 'prev')}
-                    className="rounded-full"
-                  >
+                  <Button variant="outline" size="icon" onClick={() => handleSlideChange(category.id, 'prev')} className="rounded-full">
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => handleSlideChange(category.id, 'next')}
-                    className="rounded-full"
-                  >
+                  <Button variant="outline" size="icon" onClick={() => handleSlideChange(category.id, 'next')} className="rounded-full">
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>
@@ -193,35 +166,26 @@ const NewCategories = () => {
             </div>
 
             <div className="relative overflow-hidden">
-              <div
-                className="flex transition-transform duration-500 ease-in-out"
-                style={{ 
-                  transform: `translateX(-${currentSlides[category.id as keyof typeof currentSlides] * (100 / 3)}%)` 
-                }}
-              >
-                {getFilteredProducts(category.id, category.products).map((product, productIndex) => (
-                  <div
-                    key={productIndex}
-                    className="flex-none w-full md:w-1/2 lg:w-1/3 px-4"
-                  >
+              <div className="flex transition-transform duration-500 ease-in-out" style={{ transform: `translateX(-${currentSlides[category.id] * (100 / 3)}%)` }}>
+                {getFilteredProducts(category.id, category.products).map((product, i) => (
+                  <div key={i} className="flex-none w-full md:w-1/2 lg:w-1/3 px-4">
                     <div className="card-elegant group cursor-pointer">
                       <div className="aspect-square overflow-hidden rounded-t-2xl">
-                        <img
-                          src={product.image}
-                          alt={product.name}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                        />
+                        <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                       </div>
                       <div className="p-6">
-                        <h4 className="text-lg font-semibold text-foreground mb-2">
-                          {product.name}
-                        </h4>
-                        <div className="text-xl font-bold text-primary">
-                          ₹{product.price}
+                        <h4 className="text-lg font-semibold text-foreground mb-2">{product.name}</h4>
+                        <div className="text-xl font-bold text-primary">₹{product.price}</div>
+                        <div className="flex space-x-2 mt-4">
+                          <Button className="flex-1 btn-primary">
+                            <ShoppingCart className="mr-2 h-4 w-4" />
+                            Add to Cart
+                          </Button>
+                          <Button variant="outline" className="flex-1 border-primary text-primary hover:bg-primary hover:text-white">
+                            <CreditCard className="mr-2 h-4 w-4" />
+                            Buy Now
+                          </Button>
                         </div>
-                        <Button className="w-full mt-4 btn-primary">
-                          Add to Cart
-                        </Button>
                       </div>
                     </div>
                   </div>

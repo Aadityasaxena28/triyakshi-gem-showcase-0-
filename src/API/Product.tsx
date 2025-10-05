@@ -1,24 +1,21 @@
 import { Product, RawProduct, toProduct } from "@/DataTypes/product";
-import axios from "axios";
-const BaseUrl:string =  import.meta.env.VITE_api_url;
+import { api } from "./Api";
 
-export const api = axios.create({
-  baseURL: BaseUrl,
-  timeout: 10_000,
-});
 
 type GetProductsParams = {
   page?:number;
   category?:string;
   productCount?:number; // to keep the track of the total product need to show over on single page
+  type?:string;
 };
-export async function getProducts({page=0,category="all", productCount=40}:GetProductsParams):Promise<Product[]>{
+export async function getProducts({page=0,category="gemstone",type="all", productCount=40}:GetProductsParams):Promise<Product[]>{
 
   try {
     const { data } = await api.get<RawProduct[]>(`/api/products/products`,{
       params:{
         page,
         category,
+        type,
         productCount
       }
     });
@@ -26,7 +23,7 @@ export async function getProducts({page=0,category="all", productCount=40}:GetPr
       throw new Error("Failed to fetch products");
     }
     // const products:RawProduct[]= data.products;
-    // console.log(data.data);
+    console.log(data.data);
     return data.data.map(toProduct);
   } catch (error) {
     throw new Error("Failed to fetch products" + error);

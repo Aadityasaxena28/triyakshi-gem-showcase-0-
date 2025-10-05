@@ -1,9 +1,9 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Star, Calculator, Sparkles } from "lucide-react";
+import { Calculator, Sparkles, Star } from "lucide-react";
+import { useEffect, useState } from "react";
 
 const LuckyStoneCalculator = () => {
   const [formData, setFormData] = useState({
@@ -21,7 +21,9 @@ const LuckyStoneCalculator = () => {
       [e.target.name]: e.target.value
     });
   };
-
+  useEffect(()=>{
+    window.scrollTo({top:0, behavior:'smooth'})
+  })
   const calculateLuckyStone = () => {
     setLoading(true);
     

@@ -6,48 +6,53 @@ import { Button } from "@/components/ui/button";
 import { Calculator, Gem, Heart, ShoppingBag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
+interface CAT {
+  title: string;
+  description: string;
+  image?: string;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  color: string;
+  link: string;
+};
 const Categories = () => {
-  const categories = [
+  const categories :CAT[]=[
     {
       title: "Gemstones",
       description: "Healing crystals and precious stones for spiritual growth",
       image: gemstonesImg,
       icon: Gem,
-      color: "from-blue-500 to-purple-600"
+      color: "from-blue-500 to-purple-600",
+      link: "/gemstones"
     },
     {
       title: "Rudraksh",
       description: "Sacred beads for meditation and spiritual protection",
       image: rudrakshImg,
       icon: Heart,
-      color: "from-orange-500 to-red-500"
+      color: "from-orange-500 to-red-500",
+      link: "/rudraksha"
     },
     {
       title: "Lucky Store",
       description: "Feng shui items and lucky charms for prosperity",
       image: luckyStoreImg,
       icon: ShoppingBag,
-      color: "from-green-500 to-emerald-600"
+      color: "from-green-500 to-emerald-600",
+      link:"/lucky-store"
     },
     {
       title: "Health Calculator",
       description: "Personalized recommendations based on your birth chart",
       image: healthCalculatorImg,
       icon: Calculator,
-      color: "from-primary to-primary-light"
+      color: "from-primary to-primary-light",
+      link: "/health-calculator"
     }
   ];
   const Navigate = useNavigate();
-  const HandleNavigation = (category: string) => {
+  const HandleNavigation = (link: string) => {
     return () => {
-      const formattedCategory = category.toLowerCase().replace(/\s+/g, '-');
-      if (formattedCategory === "gemstones") {
-        Navigate(`/products`);
-      }
-      else{
-
-        Navigate(`/#`);
-      }
+      Navigate(link)
     };
     
   }
@@ -93,7 +98,7 @@ const Categories = () => {
                   {/* Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl flex items-end justify-center pb-4">
                     <Button size="sm" className="btn-hero opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0"
-                    onClick={HandleNavigation(category.title)}>
+                    onClick={HandleNavigation(category.link)}>
                       Explore
                     </Button>
                   </div>

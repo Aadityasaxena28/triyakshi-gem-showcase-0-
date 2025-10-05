@@ -6,12 +6,15 @@ export interface RawProduct {
   quantity: number;
   discount?: number;         // optional if backend may omit
   image?: string;
+  images?:string[];
   type: string;             //class:subclass
   availability: string; // allow unknown strings without breaking
   category: string;
   created_at: string;        // ISO datetime string from API
   description?: string;
-  weight?: number;
+  // Not being used currently
+  // weight?: number; 
+  benefits?: string[];    // optional array of benefits
 }
 
 export interface Product {
@@ -21,12 +24,15 @@ export interface Product {
   quantity: number;
   discount: number;          // defaulted to 0 if missing
   image?: string;
+  images?:string[];
   availability:string;
   type: string;
   category: string;
   createdAt: Date;
   description: string;       // defaulted to ""
-  weight?: number;
+  // Not being used currently
+  // weight?: number; 
+  benefits?: string[];    // optional array of benefits
 }
 export function toProduct(raw: RawProduct): Product {
   return {
@@ -36,11 +42,13 @@ export function toProduct(raw: RawProduct): Product {
     quantity: raw.quantity,
     discount: raw.discount ?? 0,
     image: raw.image,
+    images: raw.images,
     availability: raw.availability,
     category: raw.category,
     type: raw.type,
     createdAt: new Date(raw.created_at),
     description: raw.description ?? "",
-    weight: raw.weight,
+    // weight: raw.weight,
+    benefits: raw.benefits,
   };
 }

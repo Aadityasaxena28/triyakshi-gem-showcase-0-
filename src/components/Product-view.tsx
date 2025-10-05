@@ -1,159 +1,151 @@
-import { getProductById } from '@/API/Product';
-import { Product } from '@/DataTypes/product';
-import { ArrowLeft, Minus, Plus, ShoppingCart, Sparkles, Star } from 'lucide-react';
-import React, { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { getProductById } from "@/API/Product";
+import type { Product } from "@/DataTypes/product";
+import { ArrowLeft, ChevronLeft, ChevronRight, Heart, Minus, Plus, ShoppingCart, Sparkles, Star } from "lucide-react";
+import React from "react";
+import { useParams } from "react-router-dom";
 
-const productsData = {
-  precious: {
-    moonga: [
-      { id: 'MNG001', name: 'Premium Red Coral', quantity: '5.25 Ratti', description: 'Natural Italian Red Coral with excellent clarity', price: 12500, originalPrice: 15000 },
-      { id: 'MNG002', name: 'Italian Moonga Stone', quantity: '7.5 Ratti', description: 'Deep red coral from Mediterranean sea', price: 18750, originalPrice: 22000 }
-    ],
-    heera: [
-      { id: 'HRA001', name: 'Brilliant Cut Diamond', quantity: '0.50 Carat', description: 'VS1 clarity, F color certified diamond', price: 85000, originalPrice: 95000 },
-      { id: 'HRA002', name: 'Round Diamond', quantity: '0.75 Carat', description: 'VVS2 clarity, excellent cut and polish', price: 125000, originalPrice: 140000 }
-    ],
-    panna: [
-      { id: 'PNA001', name: 'Colombian Emerald', quantity: '4.25 Ratti', description: 'Natural emerald with vivid green color', price: 32000, originalPrice: 38000 },
-      { id: 'PNA002', name: 'Zambian Panna', quantity: '6.0 Ratti', description: 'Premium quality with minor inclusions', price: 45000, originalPrice: 52000 }
-    ],
-    moti: [
-      { id: 'MTI001', name: 'South Sea Pearl', quantity: '8-9mm', description: 'Natural pearl with excellent luster', price: 8500, originalPrice: 10000 },
-      { id: 'MTI002', name: 'Basra Moti', quantity: '10-11mm', description: 'Rare natural pearl, certified authentic', price: 25000, originalPrice: 30000 }
-    ],
-    manik: [
-      { id: 'MNK001', name: 'Burmese Ruby', quantity: '5.5 Ratti', description: 'Pigeon blood red ruby with certification', price: 75000, originalPrice: 85000 },
-      { id: 'MNK002', name: 'Madagascar Manik', quantity: '4.0 Ratti', description: 'Natural ruby with excellent color', price: 48000, originalPrice: 55000 }
-    ],
-    pukhraj: [
-      { id: 'PKJ001', name: 'Ceylon Yellow Sapphire', quantity: '6.25 Ratti', description: 'Natural unheated yellow sapphire', price: 42000, originalPrice: 48000 },
-      { id: 'PKJ002', name: 'Thai Pukhraj', quantity: '7.5 Ratti', description: 'Premium quality with excellent clarity', price: 52500, originalPrice: 60000 }
-    ],
-    neelam: [
-      { id: 'NLM001', name: 'Kashmir Blue Sapphire', quantity: '5.0 Ratti', description: 'Rare cornflower blue sapphire', price: 95000, originalPrice: 110000 },
-      { id: 'NLM002', name: 'Ceylon Neelam', quantity: '6.5 Ratti', description: 'Natural blue sapphire, certified', price: 68000, originalPrice: 78000 }
-    ],
-    gomed: [
-      { id: 'GMD001', name: 'Hessonite Garnet', quantity: '7.25 Ratti', description: 'Natural Ceylon Gomed with honey color', price: 5500, originalPrice: 7000 },
-      { id: 'GMD002', name: 'African Gomed', quantity: '9.0 Ratti', description: 'Deep orange-red hessonite', price: 7200, originalPrice: 9000 }
-    ],
-    vaidurya: [
-      { id: 'VDR001', name: "Cat's Eye Chrysoberyl", quantity: '5.5 Ratti', description: 'Sharp chatoyancy effect, honey color', price: 35000, originalPrice: 42000 },
-      { id: 'VDR002', name: 'Lahsuniya Stone', quantity: '6.75 Ratti', description: 'Premium quality with excellent eye', price: 45000, originalPrice: 52000 }
-    ]
-  },
-  semiPrecious: {
-    sulemani: [
-      { id: 'SLM001', name: 'Sulemani Hakik', quantity: '8.0 Ratti', description: 'Natural banded agate with unique patterns', price: 2500, originalPrice: 3200 },
-      { id: 'SLM002', name: 'Black Agate Stone', quantity: '10.0 Ratti', description: 'Premium quality Sulemani stone', price: 3200, originalPrice: 4000 }
-    ],
-    safedPukhraj: [
-      { id: 'SPK001', name: 'White Sapphire', quantity: '5.25 Ratti', description: 'Natural colorless sapphire', price: 8500, originalPrice: 10500 },
-      { id: 'SPK002', name: 'Ceylon White Pukhraj', quantity: '6.5 Ratti', description: 'Excellent clarity and brilliance', price: 11000, originalPrice: 13500 }
-    ],
-    haritTurmali: [
-      { id: 'HTR001', name: 'Green Tourmaline', quantity: '4.5 Ratti', description: 'Natural green tourmaline with vibrancy', price: 15000, originalPrice: 18000 },
-      { id: 'HTR002', name: 'Afghan Harit Turmali', quantity: '5.75 Ratti', description: 'Premium chrome tourmaline', price: 22000, originalPrice: 26000 }
-    ],
-    chandrakant: [
-      { id: 'CHK001', name: 'Moonstone', quantity: '7.0 Ratti', description: 'Natural moonstone with blue sheen', price: 4500, originalPrice: 6000 },
-      { id: 'CHK002', name: 'Rainbow Chandrakant', quantity: '8.5 Ratti', description: 'Multi-color adularescence effect', price: 6500, originalPrice: 8000 }
-    ],
-    gomedak: [
-      { id: 'GMK001', name: 'Hessonite Upratna', quantity: '8.0 Ratti', description: 'Natural garnet with warm tones', price: 3500, originalPrice: 4500 },
-      { id: 'GMK002', name: 'Orange Gomedak', quantity: '10.0 Ratti', description: 'Bright orange hessonite garnet', price: 4800, originalPrice: 6000 }
-    ],
-    sunehla: [
-      { id: 'SNH001', name: 'Golden Topaz', quantity: '6.25 Ratti', description: 'Natural yellow topaz with brilliance', price: 5500, originalPrice: 7000 },
-      { id: 'SNH002', name: 'Imperial Sunehla', quantity: '7.5 Ratti', description: 'Premium golden-orange topaz', price: 8500, originalPrice: 10500 }
-    ],
-    jamuniya: [
-      { id: 'JMN001', name: 'Amethyst', quantity: '9.0 Ratti', description: 'Deep purple amethyst from Brazil', price: 3200, originalPrice: 4200 },
-      { id: 'JMN002', name: 'Zambian Jamuniya', quantity: '11.0 Ratti', description: 'Rich violet amethyst stone', price: 4500, originalPrice: 5800 }
-    ],
-    santreeGomed: [
-      { id: 'STG001', name: 'Spessartite Garnet', quantity: '5.5 Ratti', description: 'Orange-red garnet with fire', price: 12000, originalPrice: 15000 },
-      { id: 'STG002', name: 'Mandarin Santree', quantity: '6.0 Ratti', description: 'Vibrant orange spessartite', price: 16000, originalPrice: 19500 }
-    ],
-    vaiduryaUpratna: [
-      { id: 'VDU001', name: "Cat's Eye Quartz", quantity: '7.5 Ratti', description: 'Natural chatoyant quartz', price: 5500, originalPrice: 7200 },
-      { id: 'VDU002', name: 'Fiber Optic Stone', quantity: '9.0 Ratti', description: 'Strong cat eye effect', price: 7500, originalPrice: 9500 }
-    ]
-  }
+type Props = {
+  category?: "gemstone" | "rudraksha" | string;
 };
 
-const categories = {
-  precious: {
-    label: 'Precious (Ratna)',
-    subcategories: {
-      moonga: 'Moonga',
-      heera: 'Heera',
-      panna: 'Panna',
-      moti: 'Moti',
-      manik: 'Manik',
-      pukhraj: 'Pukhraj',
-      neelam: 'Neelam',
-      gomed: 'Gomed',
-      vaidurya: 'Vaidurya/Lahsuniya'
-    }
-  },
-  semiPrecious: {
-    label: 'Semi-Precious (Upratna)',
-    subcategories: {
-      sulemani: 'Sulemani',
-      safedPukhraj: 'Safed Pukhraj',
-      haritTurmali: 'Harit Turmali',
-      chandrakant: 'Chandrakant Mani',
-      gomedak: 'Gomedak',
-      sunehla: 'Sunehla',
-      jamuniya: 'Jamuniya',
-      santreeGomed: 'Santree Gomed',
-      vaiduryaUpratna: 'Vaidurya Uparatna'
-    }
+const THEME: Record<
+  string,
+  {
+    pageBgFrom: string;
+    pageBgTo: string;
+    headerFrom: string;
+    headerTo: string;
+
+    // hero band / image panel
+    bandFrom: string;
+    bandVia?: string;
+    bandTo: string;
+    overlayPulse: string;
+
+    // discount badge
+    badgeWrap: string; // gradient or solid
+    badgeText: string;
+
+    // chips
+    catChip: string;
+    sizeChip: string;
+
+    // price gradient text
+    priceFrom: string;
+    priceTo: string;
+
+    // qty card border tint
+    qtyBorder: string;
+
+    // outline btn
+    outlineText: string;
+    outlineBorder: string;
+
+    // carousel dot active
+    dotActive: string;
+    dotIdle: string;
   }
+> = {
+  gemstone: {
+    pageBgFrom: "from-yellow-50/30",
+    pageBgTo: "to-yellow-50/30",
+    headerFrom: "from-yellow-400",
+    headerTo: "to-yellow-500",
+
+    bandFrom: "from-yellow-50",
+    bandVia: undefined,
+    bandTo: "to-yellow-100",
+    overlayPulse: "bg-yellow-400/30",
+
+    badgeWrap: "bg-yellow-400",
+    badgeText: "text-gray-900",
+
+    catChip: "bg-gray-100 text-gray-800 border border-gray-200",
+    sizeChip: "bg-gray-50 text-gray-800 border-2 border-gray-200",
+
+    priceFrom: "from-yellow-600",
+    priceTo: "to-yellow-600",
+
+    qtyBorder: "border-yellow-100",
+
+    outlineText: "text-gray-900",
+    outlineBorder: "border-yellow-400 hover:border-yellow-500",
+
+    dotActive: "bg-yellow-500",
+    dotIdle: "bg-gray-300 hover:bg-gray-400",
+  },
+
+  rudraksha: {
+    pageBgFrom: "from-orange-50/30",
+    pageBgTo: "to-yellow-50/30",
+    headerFrom: "from-orange-500",
+    headerTo: "to-yellow-500",
+
+    bandFrom: "from-orange-50",
+    bandVia: "via-white",
+    bandTo: "to-yellow-100",
+    overlayPulse: "bg-orange-400/20",
+
+    badgeWrap: "bg-gradient-to-r from-orange-400 to-yellow-500",
+    badgeText: "text-white",
+
+    catChip: "bg-orange-50 text-orange-800 border-2 border-orange-200",
+    sizeChip: "bg-gray-50 text-gray-800 border-2 border-gray-200",
+
+    priceFrom: "from-orange-600",
+    priceTo: "to-yellow-600",
+
+    qtyBorder: "border-orange-100",
+
+    outlineText: "text-orange-600",
+    outlineBorder: "border-orange-500",
+
+    dotActive: "bg-orange-500",
+    dotIdle: "bg-gray-300 hover:bg-gray-400",
+  },
 };
 
-const ProductDetailView = () => {
+const ProductDetailView: React.FC<Props> = ({ category = "gemstone" }) => {
   const params = useParams();
   const [product, setProduct] = React.useState<Product | null>(null);
   const [quantity, setQuantity] = React.useState(1);
   const [discount, setDiscount] = React.useState(0);
   const [discountedPrice, setDiscountedPrice] = React.useState(0);
   const [totalPrice, setTotalPrice] = React.useState(0);
-  const baseUrl = import.meta.env.VITE_api_url;
-  useEffect(() => {
-    
+  const [currentImageIndex, setCurrentImageIndex] = React.useState(0);
+  const [benefits, setBenefits] = React.useState<string[] >([]);
+  const baseUrl = import.meta.env.VITE_api_url || "http://localhost:5000";
+
+  const theme = THEME[category] ?? THEME.gemstone;
+
+  React.useEffect(() => {
     const fetchProduct = async () => {
-      // console.log('Fetching product with ID:', params.id);
-      const fetchedProduct = await getProductById(params.id || 'MTI001');
-      console.log('Fetched product:', fetchedProduct);
-
+      const fetchedProduct = await getProductById(params.id || "MTI001");
       setProduct(fetchedProduct);
-      // setQuantity(Number(fetchedProduct.quantity) || 1);
 
-      setDiscount(fetchedProduct.discount ?? 0);
+      const d = Math.max(0, Math.min(100, fetchedProduct.discount ?? 0));
+      setDiscount(d);
 
-      const discPrice =
-        fetchedProduct.price -
-        (fetchedProduct.price * (fetchedProduct.discount ?? 0)) / 100;
-
+      const safePrice = typeof fetchedProduct.price === "number" ? fetchedProduct.price : 0;
+      const discPrice = Math.round(safePrice * (1 - d / 100));
       setDiscountedPrice(discPrice);
-      setTotalPrice(discPrice * (Number(fetchedProduct.quantity) || 1));
+      setBenefits(fetchedProduct.benefits || []);
+      console.log(fetchedProduct);
+      const initialQty = Number(fetchedProduct.quantity) || 1;
+      setTotalPrice(discPrice * initialQty);
+      setQuantity(1);
+      setCurrentImageIndex(0);
     };
     fetchProduct();
   }, [params.id]);
 
-  // Recalculate total price when quantity changes
-  useEffect(() => {
-    if (discountedPrice > 0) {
+  React.useEffect(() => {
+    if (discountedPrice >= 0) {
       setTotalPrice(discountedPrice * quantity);
     }
   }, [quantity, discountedPrice]);
 
-  const onBack = () => {
-    window.history.back();
-  };
+  const onBack = () => window.history.back();
 
   if (!product) {
     return (
@@ -163,169 +155,189 @@ const ProductDetailView = () => {
     );
   }
 
-  const categoryLabel = Object.keys(productsData.precious).some((key) =>
-    productsData.precious[key].some((p) => p.id === product.id)
-  )
-    ? 'Ratna (Precious Gemstones)'
-    : 'Upratna (Semi-Precious)';
+  // If you have real category/subcategory, plug them here.
+  const categoryLabel = category === "rudraksha" ? "Rudraksha" : "Gemstone";
+  const subcategoryName = product.type?.split(":")[1]?.replace(/-/g, " ") || "—";
 
-  const subcategoryName = 'Moti'; // You can improve this lookup later
+  // Derive originalPrice for strike-through from discount
+  const originalPrice = product.price;
 
-  const benefits = [
-    'Enhances courage and confidence',
-    'Boosts physical energy',
-    'Protects from enemies',
-    'Brings success in competitive fields',
-  ];
+  const carouselImages = [0, 1, 2, 3];
+  const nextImage = () => setCurrentImageIndex((p) => (p + 1) % carouselImages.length);
+  const prevImage = () => setCurrentImageIndex((p) => (p - 1 + carouselImages.length) % carouselImages.length);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header with gradient */}
-      <div className="bg-gradient-to-r from-purple-600 to-blue-500 text-white py-6 px-6 shadow-lg">
+    <div className={`min-h-screen bg-gradient-to-br ${theme.pageBgFrom} ${theme.pageBgTo}`}>
+      {/* Header */}
+      <div className={`bg-gradient-to-r ${theme.headerFrom} ${theme.headerTo} text-white py-6 px-6 shadow-lg sticky top-0 z-50`}>
         <div className="max-w-7xl mx-auto flex items-center gap-4">
-          <button
-            onClick={onBack}
-            className="p-2 hover:bg-white/20 rounded-lg transition-colors"
-          >
+          <button onClick={onBack} className="p-2 hover:bg-white/20 rounded-lg transition-colors">
             <ArrowLeft className="w-6 h-6" />
           </button>
           <div className="flex items-center gap-3">
             <Sparkles className="w-8 h-8" />
-            <h1 className="text-3xl font-bold">Product Details</h1>
+            <h1 className="text-3xl font-bold">{category === "rudraksha" ? "Rudraksha Details" : "Product Details"}</h1>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Left Column - Image and 360 View */}
+          {/* Left Column - Image Carousel */}
           <div className="space-y-6">
-            {/* Main Image */}
-            {/* Main Image */}
-            <div className="bg-white rounded-2xl shadow-card overflow-hidden">
-              <div className="relative h-96 bg-gradient-to-br from-yellow-50 to-yellow-100 flex items-center justify-center">
+            <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
+              <div
+                className={[
+                  "relative h-96 sm:h-[500px] bg-gradient-to-br flex items-center justify-center p-8",
+                  theme.bandFrom,
+                  theme.bandVia ?? "",
+                  theme.bandTo,
+                ].join(" ")}
+              >
                 {discount > 0 && (
-                  <div className="absolute top-4 right-4 bg-yellow-400 text-gray-900 px-4 py-2 rounded-full text-base font-bold shadow-lg z-10">
+                  <div className={`absolute top-6 right-6 ${theme.badgeWrap} ${theme.badgeText} px-5 py-2.5 rounded-full text-lg font-bold shadow-lg z-10`}>
                     {discount}% OFF
                   </div>
                 )}
-                <div className="relative">
-                  <div className="absolute inset-0 bg-yellow-400/30 blur-3xl rounded-full"></div>
 
-                  {product.image ? (
-                    <img
-                      src={`${baseUrl}${product.image}`}
-                      alt={product.name}
-                      className="h-80 w-auto object-contain relative z-10 rounded-sm"
-                    />
-                  ) : (
-                    <Star className="w-64 h-64 text-yellow-400 relative z-10" />
+                {/* Carousel Navigation */}
+                <button
+                  onClick={prevImage}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-3 rounded-full shadow-lg transition-all z-10"
+                >
+                  <ChevronLeft className="w-6 h-6 text-gray-800" />
+                </button>
+
+                <div className="relative">
+                  <div className={`absolute inset-0 ${theme.overlayPulse} blur-3xl rounded-full animate-pulse`}></div>
+                  {Array.isArray(product.images) && product.images.length > 0 ? (
+                  <img
+                    src={`${baseUrl}${product.images[0]}`}
+                    alt={product.name}
+                    className="w-[22rem] h-[22rem] object-contain relative z-10 drop-shadow-2xl rounded"
+                  />
+                ) : product.image ? (
+                  <img
+                    src={`${baseUrl}${product.image}`}
+                    alt={product.name}
+                    className="w-[22rem] h-[22rem] object-contain relative z-10 drop-shadow-2xl rounded"
+                  />
+                ) : (
+                  <Star className="w-72 h-72 text-black/10 relative z-10 drop-shadow-2xl" />
+                )}
+
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white bg-black/50 px-4 py-2 rounded-full text-sm">
+                    {currentImageIndex + 1} / {carouselImages.length}
+                  </div>
+                </div>
+
+                <button
+                  onClick={nextImage}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-3 rounded-full shadow-lg transition-all z-10"
+                >
+                  <ChevronRight className="w-6 h-6 text-gray-800" />
+                </button>
+              </div>
+
+              {/* Thumbnail Indicators */}
+              <div className="flex gap-2 justify-center p-4 bg-gray-50">
+                {carouselImages.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentImageIndex(index)}
+                    className={`h-3 rounded-full transition-all ${index === currentImageIndex ? `${theme.dotActive} w-8` : `${theme.dotIdle} w-3`}`}
+                  />
+                ))}
+              </div>
+
+              {/* Basic Info */}
+              <div className="p-8 border-t border-gray-100">
+                <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">{product.name}</h2>
+                <p className={`${category === "rudraksha" ? "text-orange-600" : "text-yellow-600"} font-semibold text-lg mb-5`}>
+                  Product ID: {product.id}
+                </p>
+
+                <div className="flex flex-wrap gap-3 mb-6">
+                  <span className={`px-4 py-2 rounded-full text-sm font-medium ${theme.catChip}`}>
+                    {categoryLabel}
+                  </span>
+                  <span className={`px-4 py-2 rounded-full text-sm font-medium ${theme.sizeChip}`}>
+                    Size / Qty: {product.quantity}
+                  </span>
+                </div>
+
+                <div className="flex items-baseline gap-4 mb-4">
+                  <span className={`text-5xl font-bold bg-gradient-to-r ${theme.priceFrom} ${theme.priceTo} bg-clip-text text-transparent`}>
+                    ₹{discountedPrice.toLocaleString()}
+                  </span>
+                  {discount > 0 && originalPrice > discountedPrice && (
+                    <span className="text-2xl text-gray-400 line-through">₹{originalPrice.toLocaleString()}</span>
                   )}
                 </div>
               </div>
             </div>
-
-
-            {/* 360 Stone View */}
-            <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl shadow-card p-8">
-              <div className="flex flex-col items-center justify-center text-center space-y-4">
-                <div className="bg-purple-100 p-6 rounded-full">
-                  <Sparkles className="w-16 h-16 text-purple-600" />
-                </div>
-                <h3 className="text-2xl font-bold text-gray-800">360° Stone View</h3>
-                <p className="text-gray-600">
-                  Video placeholder - Add your 360° rotation video here
-                </p>
-              </div>
-            </div>
           </div>
 
-          {/* Right Column - Details */}
+          {/* Right Column */}
           <div className="space-y-6">
-            {/* Product Info Card */}
-            <div className="bg-white rounded-2xl shadow-card p-8">
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h2>
-              <p className="text-purple-600 font-semibold mb-4">
-                Product ID: {product.id}
-              </p>
-
-              <div className="flex gap-3 mb-6">
-                <span className="px-4 py-2 bg-gray-100 text-gray-800 rounded-full text-sm font-medium border border-gray-200">
-                  {categoryLabel}
-                </span>
-                <span className="px-4 py-2 bg-gray-100 text-gray-800 rounded-full text-sm font-medium border border-gray-200">
-                  {subcategoryName}
-                </span>
-              </div>
-
-              <div className="flex items-baseline gap-3 mb-6">
-                <span className="text-4xl font-bold text-purple-600">
-                  ₹{product.price.toLocaleString()}
-                </span>
-                {product.price > discountedPrice && (
-                  <span className="text-2xl text-gray-400 line-through">
-                    ₹{product.price.toLocaleString()}
-                  </span>
-                )}
-              </div>
-
-              <p className="text-gray-600 mb-2 font-medium">
-                {product.quantity} available
-              </p>
-            </div>
-
-            {/* Description Card */}
-            <div className="bg-white rounded-2xl shadow-card p-8">
+            {/* Description */}
+            <div className="bg-white rounded-3xl shadow-xl p-8">
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Description</h3>
-              <p className="text-gray-600 leading-relaxed">{product.description}</p>
+              <p className="text-gray-600 leading-relaxed">{product.description || "—"}</p>
             </div>
 
-            {/* Quantity Selector Card */}
-            <div className="bg-white rounded-2xl shadow-card p-8">
+            {/* Quantity & Actions */}
+            <div className={`bg-gradient-to-br from-white to-white rounded-3xl shadow-xl p-8 border-2 ${theme.qtyBorder}`}>
               <h3 className="text-2xl font-bold text-gray-900 mb-6">Select Quantity</h3>
               <div className="flex items-center justify-center gap-6 mb-6">
                 <button
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="w-12 h-12 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                  className="w-14 h-14 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 flex items-center justify-center transition-all shadow-md hover:shadow-lg"
                 >
-                  <Minus className="w-5 h-5 text-gray-700" />
+                  <Minus className="w-6 h-6 text-gray-700" />
                 </button>
-                <span className="text-3xl font-bold text-gray-900 w-16 text-center">
-                  {quantity}
-                </span>
+                <span className="text-4xl font-bold text-gray-900 w-20 text-center">{quantity}</span>
                 <button
-                  onClick={() => setQuantity(Math.min(product.quantity,quantity + 1))}
-                  className="w-12 h-12 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+                  onClick={() => setQuantity((q) => Math.min(product.quantity, q + 1))}
+                  className="w-14 h-14 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 flex items-center justify-center transition-all shadow-md hover:shadow-lg"
                 >
-                  <Plus className="w-5 h-5 text-gray-700" />
+                  <Plus className="w-6 h-6 text-gray-700" />
                 </button>
               </div>
-              <p className="text-xl font-semibold text-purple-600 text-center">
+              <p className={`text-2xl font-bold bg-gradient-to-r ${theme.priceFrom} ${theme.priceTo} bg-clip-text text-transparent text-center mb-6`}>
                 Total: ₹{totalPrice.toLocaleString()}
               </p>
-            </div>
 
-            {/* Buy Now Button */}
-            <button className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-bold py-5 px-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3 text-lg">
-              <ShoppingCart className="w-6 h-6" />
-              Buy Now
-            </button>
+              <div className="space-y-3">
+                <button className={`w-full bg-gradient-to-r ${theme.headerFrom} ${theme.headerTo} hover:opacity-95 text-white font-bold py-5 px-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3 text-lg transform hover:scale-105`}>
+                  <ShoppingCart className="w-6 h-6" />
+                  Buy Now
+                </button>
 
-            {/* Benefits Card */}
-            <div className="bg-gradient-to-br from-yellow-50 to-white rounded-2xl shadow-card p-8 border border-yellow-100">
-              <div className="flex items-center gap-3 mb-6">
-                <Sparkles className="w-7 h-7 text-purple-600" />
-                <h3 className="text-2xl font-bold text-gray-900">Benefits</h3>
+                <button className={`w-full bg-white hover:bg-gray-50 ${theme.outlineText} font-bold py-5 px-8 rounded-2xl shadow-lg border-2 ${theme.outlineBorder} transition-all duration-300 flex items-center justify-center gap-3 text-lg transform hover:scale-105`}>
+                  <Heart className="w-6 h-6" />
+                  Add to Cart
+                </button>
               </div>
-              <ul className="space-y-4">
-                {benefits.map((benefit, index) => (
-                  <li key={index} className="flex items-start gap-3">
-                    <div className="w-2 h-2 rounded-full bg-purple-600 mt-2 flex-shrink-0"></div>
-                    <span className="text-gray-700 text-lg">{benefit}</span>
-                  </li>
-                ))}
-              </ul>
             </div>
+
+            {/* Benefits */}
+            {(benefits?.length ?? 0) > 0 && (
+              <div className={`bg-gradient-to-br ${category === "rudraksha" ? "from-orange-50" : "from-yellow-50"} to-white rounded-3xl shadow-xl p-8 border-2 ${theme.qtyBorder}`}>
+                <div className="flex items-center gap-3 mb-6">
+                  <Sparkles className={`w-8 h-8 ${category === "rudraksha" ? "text-orange-600" : "text-yellow-600"}`} />
+                  <h3 className="text-2xl font-bold text-gray-900">Benefits</h3>
+                </div>
+                <ul className="space-y-4">
+                  {benefits.map((benefit: string, idx: number) => (
+                    <li key={idx} className="flex items-start gap-4">
+                      <div className={`w-2.5 h-2.5 rounded-full ${category === "rudraksha" ? "bg-orange-600" : "bg-yellow-600"} mt-2.5 flex-shrink-0`}></div>
+                      <span className="text-gray-700 text-lg leading-relaxed">{benefit}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
       </div>

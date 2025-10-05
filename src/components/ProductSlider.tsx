@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { ChevronLeft, ChevronRight, Star, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight, CreditCard, ShoppingCart, Star } from "lucide-react";
+import { useState } from "react";
 
 const ProductSlider = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -69,104 +69,64 @@ const ProductSlider = () => {
   return (
     <section className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
         <div className="flex items-center justify-between mb-12">
           <div>
-            <h2 className="text-4xl font-bold text-gradient mb-2">
-              Special Discounts
-            </h2>
-            <p className="text-muted-foreground text-lg">
-              Limited time offers on premium gemstones
-            </p>
+            <h2 className="text-4xl font-bold text-gradient mb-2">Special Discounts</h2>
+            <p className="text-muted-foreground text-lg">Limited time offers on premium gemstones</p>
           </div>
-          
-          {/* Navigation Buttons */}
+
           <div className="hidden md:flex space-x-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={prevSlide}
-              className="rounded-full hover:shadow-elegant transition-all duration-300"
-            >
+            <Button variant="outline" size="icon" onClick={prevSlide} className="rounded-full hover:shadow-elegant">
               <ChevronLeft className="h-5 w-5" />
             </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={nextSlide}
-              className="rounded-full hover:shadow-elegant transition-all duration-300"
-            >
+            <Button variant="outline" size="icon" onClick={nextSlide} className="rounded-full hover:shadow-elegant">
               <ChevronRight className="h-5 w-5" />
             </Button>
           </div>
         </div>
 
-        {/* Product Slider */}
         <div className="relative overflow-hidden">
-          <div
-            className="flex transition-transform duration-500 ease-in-out"
-            style={{ transform: `translateX(-${currentSlide * (100 / 3)}%)` }}
-          >
+          <div className="flex transition-transform duration-500 ease-in-out" style={{ transform: `translateX(-${currentSlide * (100 / 3)}%)` }}>
             {discountedProducts.map((product) => (
-              <div
-                key={product.id}
-                className="flex-none w-full md:w-1/2 lg:w-1/3 px-4"
-              >
+              <div key={product.id} className="flex-none w-full md:w-1/2 lg:w-1/3 px-4">
                 <div className="card-elegant group cursor-pointer relative overflow-hidden">
-                  {/* Discount Badge */}
                   <div className="absolute top-4 left-4 z-10 bg-gradient-gold text-white px-3 py-1 rounded-full text-sm font-semibold shadow-gold">
                     {product.discount}% OFF
                   </div>
 
-                  {/* Product Image */}
                   <div className="aspect-square overflow-hidden rounded-t-2xl">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
+                    <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                   </div>
 
-                  {/* Product Info */}
                   <div className="p-6">
                     <h3 className="text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors duration-300">
                       {product.name}
                     </h3>
 
-                    {/* Rating */}
                     <div className="flex items-center space-x-2 mb-3">
                       <div className="flex items-center">
                         {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`h-4 w-4 ${
-                              i < Math.floor(product.rating)
-                                ? "text-gold fill-current"
-                                : "text-gray-300"
-                            }`}
-                          />
+                          <Star key={i} className={`h-4 w-4 ${i < Math.floor(product.rating) ? "text-gold fill-current" : "text-gray-300"}`} />
                         ))}
                       </div>
-                      <span className="text-sm text-muted-foreground">
-                        {product.rating} ({product.reviews} reviews)
-                      </span>
+                      <span className="text-sm text-muted-foreground">{product.rating} ({product.reviews} reviews)</span>
                     </div>
 
-                    {/* Pricing */}
                     <div className="flex items-center space-x-3 mb-4">
-                      <span className="text-2xl font-bold text-primary">
-                        ₹{product.discountedPrice}
-                      </span>
-                      <span className="text-lg text-muted-foreground line-through">
-                        ₹{product.originalPrice}
-                      </span>
+                      <span className="text-2xl font-bold text-primary">₹{product.discountedPrice}</span>
+                      <span className="text-lg text-muted-foreground line-through">₹{product.originalPrice}</span>
                     </div>
 
-                    {/* Add to Cart Button */}
-                    <Button className="w-full btn-primary group-hover:shadow-elegant">
-                      <ShoppingCart className="mr-2 h-4 w-4" />
-                      Add to Cart
-                    </Button>
+                    <div className="flex space-x-2">
+                      <Button className="flex-1 btn-primary group-hover:shadow-elegant">
+                        <ShoppingCart className="mr-2 h-4 w-4" />
+                        Add to Cart
+                      </Button>
+                      <Button variant="outline" className="flex-1 border-primary text-primary hover:bg-primary hover:text-white">
+                        <CreditCard className="mr-2 h-4 w-4" />
+                        Buy Now
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -174,27 +134,15 @@ const ProductSlider = () => {
           </div>
         </div>
 
-        {/* Mobile Navigation */}
         <div className="flex md:hidden justify-center space-x-2 mt-8">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={prevSlide}
-            className="rounded-full"
-          >
+          <Button variant="outline" size="icon" onClick={prevSlide} className="rounded-full">
             <ChevronLeft className="h-5 w-5" />
           </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={nextSlide}
-            className="rounded-full"
-          >
+          <Button variant="outline" size="icon" onClick={nextSlide} className="rounded-full">
             <ChevronRight className="h-5 w-5" />
           </Button>
         </div>
 
-        {/* View All Button */}
         <div className="text-center mt-12">
           <Button size="lg" variant="outline" className="rounded-xl border-primary text-primary hover:bg-primary hover:text-white">
             View All Discounted Items
