@@ -1,8 +1,13 @@
+import { addToCart } from "@/API/Cart";
 import { getProductById } from "@/API/Product";
+import { CartItem } from "@/DataTypes/CartData";
+import { CheckoutDraft, CheckoutItem } from "@/DataTypes/Checkout";
 import type { Product } from "@/DataTypes/product";
+import { toastError, toastSuccess } from "@/utlity/AlertSystem";
+import { setWithExpiry } from "@/utlity/Storage";
 import { ArrowLeft, ChevronLeft, ChevronRight, Heart, Minus, Plus, ShoppingCart, Sparkles, Star } from "lucide-react";
 import React from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 type Props = {
   category?: "gemstone" | "rudraksha" | string;
@@ -115,7 +120,8 @@ const ProductDetailView: React.FC<Props> = ({ category = "gemstone" }) => {
   const [currentImageIndex, setCurrentImageIndex] = React.useState(0);
   const [benefits, setBenefits] = React.useState<string[] >([]);
   const baseUrl = import.meta.env.VITE_api_url || "http://localhost:5000";
-
+  const navigate= useNavigate();
+  const BDK = import.meta.env.VITE_BUY_DRAFT_KEY;
   const theme = THEME[category] ?? THEME.gemstone;
 
   React.useEffect(() => {
@@ -130,7 +136,7 @@ const ProductDetailView: React.FC<Props> = ({ category = "gemstone" }) => {
       const discPrice = Math.round(safePrice * (1 - d / 100));
       setDiscountedPrice(discPrice);
       setBenefits(fetchedProduct.benefits || []);
-      console.log(fetchedProduct);
+      // console.log(fetchedProduct);
       const initialQty = Number(fetchedProduct.quantity) || 1;
       setTotalPrice(discPrice * initialQty);
       setQuantity(1);
@@ -144,6 +150,44 @@ const ProductDetailView: React.FC<Props> = ({ category = "gemstone" }) => {
       setTotalPrice(discountedPrice * quantity);
     }
   }, [quantity, discountedPrice]);
+  async function handleAddToCart(productId:string,quantity:number){
+    try {
+      const param:CartItem= {
+        productId,
+        quantity
+      };
+      const isAdded = await addToCart(param);
+      if (isAdded){
+        toastSuccess("Item Successfully Added to cart")
+      }
+    } catch (error) {
+      toastError(error||"Failed To Add Product")
+    }
+  } ;
+  function handleBuyNow(product: Product, qty: number) {
+    // Require login
+    const isLoggedIn: boolean = !!localStorage.getItem("tg_user");
+    if(!isLoggedIn){
+      navigate("/login")
+    }
+    const item: CheckoutItem = {
+      productId: product.id,
+      name: product.name,
+      qty,
+      image: product.image,
+      unitPrice: product.price ?? 0,
+      discount: product.discount ?? 0,
+      type: product.type,
+    };
+  
+    const draft: CheckoutDraft = { items: [item], createdAt: Date.now() };
+  
+    setWithExpiry(BDK, draft, 15 * 60 * 1000);
+    // console.log("[BUY-NOW] key:", BDK, "payload:", draft);
+    // console.log("[BUY-NOW] raw in storage:", sessionStorage.getItem(BDK));
+    navigate("/checkout", { state: { from: "buy-now" } });
+  }
+
 
   const onBack = () => window.history.back();
 
@@ -309,12 +353,16 @@ const ProductDetailView: React.FC<Props> = ({ category = "gemstone" }) => {
               </p>
 
               <div className="space-y-3">
-                <button className={`w-full bg-gradient-to-r ${theme.headerFrom} ${theme.headerTo} hover:opacity-95 text-white font-bold py-5 px-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3 text-lg transform hover:scale-105`}>
+                <button className={`w-full bg-gradient-to-r ${theme.headerFrom} ${theme.headerTo} hover:opacity-95 text-white font-bold py-5 px-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3 text-lg transform hover:scale-105`}
+                onClick={()=> handleBuyNow(product,quantity)}>
                   <ShoppingCart className="w-6 h-6" />
                   Buy Now
                 </button>
 
-                <button className={`w-full bg-white hover:bg-gray-50 ${theme.outlineText} font-bold py-5 px-8 rounded-2xl shadow-lg border-2 ${theme.outlineBorder} transition-all duration-300 flex items-center justify-center gap-3 text-lg transform hover:scale-105`}>
+                <button className={`w-full bg-white hover:bg-gray-50 ${theme.outlineText} font-bold py-5 px-8 rounded-2xl shadow-lg border-2 ${theme.outlineBorder} transition-all duration-300 flex items-center justify-center gap-3 text-lg transform hover:scale-105`} 
+                onClick={()=>{
+                  handleAddToCart(product.id,quantity)
+                }}>
                   <Heart className="w-6 h-6" />
                   Add to Cart
                 </button>

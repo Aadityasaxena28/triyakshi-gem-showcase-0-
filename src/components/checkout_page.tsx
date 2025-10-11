@@ -1,71 +1,158 @@
-import React, { useState } from 'react';
-import { ChevronRight, Plus, MapPin, CreditCard } from 'lucide-react';
+import { CheckoutDraft } from "@/DataTypes/Checkout";
+import { getWithExpiry } from "@/utlity/Storage";
+import { ChevronRight, CreditCard, MapPin, XCircle } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+
+const currency = (v: number) => new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(v);
 
 export default function CheckoutPage() {
-  const [currentStep, setCurrentStep] = useState('contact');
-  
-  const [mobileNumber, setMobileNumber] = useState('');
-  const [email, setEmail] = useState('');
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const BDK = import.meta.env.VITE_BUY_DRAFT_KEY;
+  const baseUrl = import.meta.env.VITE_api_url || "http://localhost:5000";
+
+  const [currentStep, setCurrentStep] = useState<"contact" | "address" | "payment">("contact");
+
+  // Contact
+  const [mobileNumber, setMobileNumber] = useState("");
+  const [email, setEmail] = useState("");
   const [receiveUpdates, setReceiveUpdates] = useState(true);
   const [mobileError, setMobileError] = useState(false);
   const [emailError, setEmailError] = useState(false);
 
-  const [fullName, setFullName] = useState('');
-  const [addressLine1, setAddressLine1] = useState('');
-  const [addressLine2, setAddressLine2] = useState('');
-  const [city, setCity] = useState('');
-  const [state, setState] = useState('');
-  const [pincode, setPincode] = useState('');
-  const [addressErrors, setAddressErrors] = useState({});
+  // Address
+  const [fullName, setFullName] = useState("");
+  const [addressLine1, setAddressLine1] = useState("");
+  const [addressLine2, setAddressLine2] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+  const [pincode, setPincode] = useState("");
+  const [addressErrors, setAddressErrors] = useState<Record<string, boolean>>({});
 
-  const [paymentMethod, setPaymentMethod] = useState('');
+  // Payment
+  const [paymentMethod, setPaymentMethod] = useState<"upi" | "card" | "netbanking" | "wallet" | "">("");
 
+  // Draft
+  const [draft, setDraft] = useState<CheckoutDraft | null>(null);
+  const [source, setSource] = useState<"buy-now" | "cart">("buy-now");
+
+  // ====== Load items from either Buy-Now Draft OR Cart State ======
+  useEffect(() => {
+    const locationState = location.state as any;
+    
+    // Check if coming from cart
+    if (locationState?.from === "cart" && locationState?.items) {
+      console.log("[CHECKOUT] Loading from Cart:", locationState.items);
+      setDraft({ items: locationState.items });
+      setSource("cart");
+    } 
+    // Otherwise check for buy-now draft
+    else {
+      console.log("[CHECKOUT] Loading from Buy-Now draft");
+      const d = getWithExpiry<CheckoutDraft>(BDK);
+      console.log("[CHECKOUT] Buy-now draft:", d);
+      setDraft(d);
+      setSource("buy-now");
+    }
+  }, [BDK, location.state]);
+
+  // Derived pricing
+  const { subTotal, discountTotal, shipping, tax, grandTotal } = useMemo(() => {
+    const items = draft?.items || [];
+    let sub = 0;
+    let disc = 0;
+
+    for (const it of items) {
+      const qty = Math.max(1, Number(it.qty) || 1);
+      const unit = Math.max(0, Number(it.unitPrice) || 0);
+      const d = Math.min(100, Math.max(0, Number(it.discount) || 0));
+      const discountedUnit = Math.round(unit * (1 - d / 100));
+
+      sub += discountedUnit * qty;
+      disc += Math.round(unit * qty - discountedUnit * qty);
+    }
+
+    // Free shipping for both buy-now and cart
+    const shipping = items.length > 0 ? 0 : 0;
+    const tax = Math.round(sub * 0.03); // 3% GST
+    const grand = sub + shipping + tax;
+
+    return { subTotal: sub, discountTotal: disc, shipping, tax, grandTotal: grand };
+  }, [draft]);
+
+  // ====== Step handlers ======
   const handleContactContinue = () => {
     let hasError = false;
-    
-    if (!mobileNumber) {
+
+    if (!/^\d{10}$/.test(mobileNumber)) {
       setMobileError(true);
       hasError = true;
-    } else {
-      setMobileError(false);
-    }
-    
-    if (!email) {
+    } else setMobileError(false);
+
+    if (!/^\S+@\S+\.\S+$/.test(email)) {
       setEmailError(true);
       hasError = true;
-    } else {
-      setEmailError(false);
-    }
-    
-    if (!hasError) {
-      setCurrentStep('address');
-    }
+    } else setEmailError(false);
+
+    if (!hasError) setCurrentStep("address");
   };
 
   const handleAddressContinue = () => {
-    const errors = {};
-    
-    if (!fullName) errors.fullName = true;
-    if (!addressLine1) errors.addressLine1 = true;
-    if (!city) errors.city = true;
-    if (!state) errors.state = true;
-    if (!pincode) errors.pincode = true;
-    
+    const errors: Record<string, boolean> = {};
+    if (!fullName.trim()) errors.fullName = true;
+    if (!addressLine1.trim()) errors.addressLine1 = true;
+    if (!city.trim()) errors.city = true;
+    if (!state.trim()) errors.state = true;
+    if (!/^\d{6}$/.test(pincode)) errors.pincode = true;
+
     setAddressErrors(errors);
-    
-    if (Object.keys(errors).length === 0) {
-      setCurrentStep('payment');
-    }
+    if (Object.keys(errors).length === 0) setCurrentStep("payment");
   };
 
-  const handlePaymentComplete = () => {
+  const handlePaymentComplete = async () => {
     if (!paymentMethod) {
-      alert('Please select a payment method');
+      alert("Please select a payment method");
       return;
     }
-    alert('Order placed successfully!');
+    if (!draft?.items?.length) {
+      alert("Your order is empty.");
+      return;
+    }
+
+    // Payload for backend
+    const payload = {
+      contact: { mobileNumber: `+91${mobileNumber}`, email, receiveUpdates },
+      address: { fullName, addressLine1, addressLine2, city, state, pincode },
+      payment: { method: paymentMethod },
+      order: {
+        items: draft.items,
+        subTotal,
+        discountTotal,
+        shipping,
+        tax,
+        grandTotal,
+      },
+      meta: { source }, // "buy-now" or "cart"
+    };
+
+    console.log("PLACE ORDER payload ->", payload);
+
+    // TODO: Send to backend API
+    // const response = await placeOrder(payload);
+
+    // On success:
+    if (source === "buy-now") {
+      sessionStorage.removeItem(BDK); // Clear buy-now draft
+    }
+    // If from cart, you might want to call a clear cart API
+
+    alert("Order placed successfully!");
+    navigate("/home");
   };
 
+  // ====== UI sections (same as before) ======
   const renderContactForm = () => (
     <div className="max-w-xl">
       <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -103,7 +190,7 @@ export default function CheckoutPage() {
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
               </svg>
-              Please enter your mobile number
+              Please enter a valid 10-digit mobile number
             </p>
           )}
         </div>
@@ -124,7 +211,7 @@ export default function CheckoutPage() {
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
               </svg>
-              Please enter your email
+              Please enter a valid email
             </p>
           )}
         </div>
@@ -169,9 +256,11 @@ export default function CheckoutPage() {
             value={fullName}
             onChange={(e) => {
               setFullName(e.target.value);
-              setAddressErrors({...addressErrors, fullName: false});
+              setAddressErrors((s) => ({ ...s, fullName: false }));
             }}
-            className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${addressErrors.fullName ? 'border-red-500' : 'border-gray-300'}`}
+            className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
+              addressErrors.fullName ? "border-red-500" : "border-gray-300"
+            }`}
           />
           {addressErrors.fullName && (
             <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
@@ -190,9 +279,11 @@ export default function CheckoutPage() {
             value={addressLine1}
             onChange={(e) => {
               setAddressLine1(e.target.value);
-              setAddressErrors({...addressErrors, addressLine1: false});
+              setAddressErrors((s) => ({ ...s, addressLine1: false }));
             }}
-            className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${addressErrors.addressLine1 ? 'border-red-500' : 'border-gray-300'}`}
+            className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
+              addressErrors.addressLine1 ? "border-red-500" : "border-gray-300"
+            }`}
           />
           {addressErrors.addressLine1 && (
             <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
@@ -220,9 +311,11 @@ export default function CheckoutPage() {
               value={city}
               onChange={(e) => {
                 setCity(e.target.value);
-                setAddressErrors({...addressErrors, city: false});
+                setAddressErrors((s) => ({ ...s, city: false }));
               }}
-              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${addressErrors.city ? 'border-red-500' : 'border-gray-300'}`}
+              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
+                addressErrors.city ? "border-red-500" : "border-gray-300"
+              }`}
             />
             {addressErrors.city && (
               <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
@@ -240,9 +333,11 @@ export default function CheckoutPage() {
               value={state}
               onChange={(e) => {
                 setState(e.target.value);
-                setAddressErrors({...addressErrors, state: false});
+                setAddressErrors((s) => ({ ...s, state: false }));
               }}
-              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${addressErrors.state ? 'border-red-500' : 'border-gray-300'}`}
+              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
+                addressErrors.state ? "border-red-500" : "border-gray-300"
+              }`}
             />
             {addressErrors.state && (
               <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
@@ -262,23 +357,25 @@ export default function CheckoutPage() {
             value={pincode}
             onChange={(e) => {
               setPincode(e.target.value);
-              setAddressErrors({...addressErrors, pincode: false});
+              setAddressErrors((s) => ({ ...s, pincode: false }));
             }}
-            className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${addressErrors.pincode ? 'border-red-500' : 'border-gray-300'}`}
+            className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
+              addressErrors.pincode ? "border-red-500" : "border-gray-300"
+            }`}
           />
           {addressErrors.pincode && (
             <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
               </svg>
-              Please enter pincode
+              Please enter a valid 6-digit pincode
             </p>
           )}
         </div>
 
         <div className="flex gap-3">
           <button
-            onClick={() => setCurrentStep('contact')}
+            onClick={() => setCurrentStep("contact")}
             className="flex-1 bg-gray-200 text-gray-800 py-4 rounded-lg font-semibold text-lg hover:bg-gray-300 transition-colors mt-6"
           >
             Back
@@ -304,114 +401,42 @@ export default function CheckoutPage() {
       <p className="text-gray-600 text-center mb-8">Choose your preferred payment method</p>
 
       <div className="space-y-3">
-        <button
-          onClick={() => setPaymentMethod('upi')}
-          className={`w-full p-4 border-2 rounded-lg text-left transition-all ${
-            paymentMethod === 'upi' 
-              ? 'border-yellow-600 bg-yellow-50' 
-              : 'border-gray-300 hover:border-gray-400'
-          }`}
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                paymentMethod === 'upi' ? 'border-yellow-600' : 'border-gray-300'
-              }`}>
-                {paymentMethod === 'upi' && (
-                  <div className="w-3 h-3 rounded-full bg-yellow-600"></div>
-                )}
+        {[
+          { key: "upi", title: "UPI", subtitle: "Pay using UPI apps", emoji: "📱" },
+          { key: "card", title: "Credit / Debit Card", subtitle: "Visa, Mastercard, Amex, Rupay", emoji: "💳" },
+          { key: "netbanking", title: "Net Banking", subtitle: "All major banks supported", emoji: "🏦" },
+          { key: "wallet", title: "Wallets", subtitle: "Paytm, PhonePe, Amazon Pay", emoji: "👛" },
+        ].map((m) => (
+          <button
+            key={m.key}
+            onClick={() => setPaymentMethod(m.key as any)}
+            className={`w-full p-4 border-2 rounded-lg text-left transition-all ${
+              paymentMethod === m.key ? "border-yellow-600 bg-yellow-50" : "border-gray-300 hover:border-gray-400"
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div
+                  className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                    paymentMethod === m.key ? "border-yellow-600" : "border-gray-300"
+                  }`}
+                >
+                  {paymentMethod === m.key && <div className="w-3 h-3 rounded-full bg-yellow-600"></div>}
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900">{m.title}</p>
+                  <p className="text-sm text-gray-600">{m.subtitle}</p>
+                </div>
               </div>
-              <div>
-                <p className="font-semibold text-gray-900">UPI</p>
-                <p className="text-sm text-gray-600">Pay using UPI apps</p>
-              </div>
+              <div className="text-2xl">{m.emoji}</div>
             </div>
-            <div className="text-2xl">📱</div>
-          </div>
-        </button>
-
-        <button
-          onClick={() => setPaymentMethod('card')}
-          className={`w-full p-4 border-2 rounded-lg text-left transition-all ${
-            paymentMethod === 'card' 
-              ? 'border-yellow-600 bg-yellow-50' 
-              : 'border-gray-300 hover:border-gray-400'
-          }`}
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                paymentMethod === 'card' ? 'border-yellow-600' : 'border-gray-300'
-              }`}>
-                {paymentMethod === 'card' && (
-                  <div className="w-3 h-3 rounded-full bg-yellow-600"></div>
-                )}
-              </div>
-              <div>
-                <p className="font-semibold text-gray-900">Credit / Debit Card</p>
-                <p className="text-sm text-gray-600">Visa, Mastercard, Amex, Rupay</p>
-              </div>
-            </div>
-            <div className="text-2xl">💳</div>
-          </div>
-        </button>
-
-        <button
-          onClick={() => setPaymentMethod('netbanking')}
-          className={`w-full p-4 border-2 rounded-lg text-left transition-all ${
-            paymentMethod === 'netbanking' 
-              ? 'border-yellow-600 bg-yellow-50' 
-              : 'border-gray-300 hover:border-gray-400'
-          }`}
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                paymentMethod === 'netbanking' ? 'border-yellow-600' : 'border-gray-300'
-              }`}>
-                {paymentMethod === 'netbanking' && (
-                  <div className="w-3 h-3 rounded-full bg-yellow-600"></div>
-                )}
-              </div>
-              <div>
-                <p className="font-semibold text-gray-900">Net Banking</p>
-                <p className="text-sm text-gray-600">All major banks supported</p>
-              </div>
-            </div>
-            <div className="text-2xl">🏦</div>
-          </div>
-        </button>
-
-        <button
-          onClick={() => setPaymentMethod('wallet')}
-          className={`w-full p-4 border-2 rounded-lg text-left transition-all ${
-            paymentMethod === 'wallet' 
-              ? 'border-yellow-600 bg-yellow-50' 
-              : 'border-gray-300 hover:border-gray-400'
-          }`}
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                paymentMethod === 'wallet' ? 'border-yellow-600' : 'border-gray-300'
-              }`}>
-                {paymentMethod === 'wallet' && (
-                  <div className="w-3 h-3 rounded-full bg-yellow-600"></div>
-                )}
-              </div>
-              <div>
-                <p className="font-semibold text-gray-900">Wallets</p>
-                <p className="text-sm text-gray-600">Paytm, PhonePe, Amazon Pay</p>
-              </div>
-            </div>
-            <div className="text-2xl">👛</div>
-          </div>
-        </button>
+          </button>
+        ))}
       </div>
 
       <div className="flex gap-3">
         <button
-          onClick={() => setCurrentStep('address')}
+          onClick={() => setCurrentStep("address")}
           className="flex-1 bg-gray-200 text-gray-800 py-4 rounded-lg font-semibold text-lg hover:bg-gray-300 transition-colors mt-6"
         >
           Back
@@ -426,10 +451,44 @@ export default function CheckoutPage() {
     </div>
   );
 
+  // ====== Empty/Invalid draft UI ======
+  if (!draft || !draft.items || draft.items.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+        <div className="max-w-lg w-full bg-white shadow-lg rounded-2xl p-8 text-center">
+          <XCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Your bag is empty</h2>
+          <p className="text-gray-600 mb-6">
+            {source === "cart" 
+              ? "Your cart is empty. Add some items to checkout!" 
+              : "Looks like you didn't add an item via Buy Now. Grab something shiny!"}
+          </p>
+          <div className="flex gap-3 justify-center">
+            <button
+              onClick={() => navigate("/gemstones")}
+              className="px-5 py-3 rounded-lg bg-yellow-500 text-white font-semibold hover:bg-yellow-600 transition-colors"
+            >
+              Browse Gemstones
+            </button>
+            <button
+              onClick={() => navigate("/rudraksha")}
+              className="px-5 py-3 rounded-lg bg-orange-500 text-white font-semibold hover:bg-orange-600 transition-colors"
+            >
+              Browse Rudraksha
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ====== Main Layout ======
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-600 to-yellow-700 p-4 flex items-center justify-center">
       <div className="w-full max-w-6xl flex gap-6">
+        {/* Left Sidebar */}
         <div className="w-96 flex flex-col gap-4">
+          {/* Brand */}
           <div className="bg-white rounded-2xl p-6 shadow-lg">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-12 h-12 bg-yellow-600 rounded-xl flex items-center justify-center">
@@ -447,40 +506,98 @@ export default function CheckoutPage() {
             </div>
           </div>
 
+          {/* Order summary */}
           <div className="bg-white rounded-2xl p-6 shadow-lg">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Order summary</h2>
+              <h2 className="text-lg font-semibold text-gray-900">
+                Order summary
+                {source === "cart" && (
+                  <span className="ml-2 text-xs font-normal text-gray-500">
+                    ({draft.items.length} {draft.items.length === 1 ? "item" : "items"})
+                  </span>
+                )}
+              </h2>
               <ChevronRight className="w-5 h-5 text-gray-400" />
             </div>
-            
-            <div className="flex gap-3 mb-6">
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <div className="w-8 h-8 bg-purple-400 rounded-full"></div>
-              </div>
-              <div className="flex-1">
-                <h3 className="text-sm font-medium text-gray-900">Amethyst - 13.6</h3>
-                <p className="text-sm text-gray-600">Carats - SHUDH -...</p>
-                <p className="text-xs text-gray-500 mt-1">Qty. 1</p>
-              </div>
-              <div className="text-right">
-                <p className="text-lg font-bold text-gray-900">₹22,500</p>
-              </div>
+
+            {/* Items */}
+            <div className="space-y-4">
+              {draft.items.map((it, idx) => {
+                const d = Math.min(100, Math.max(0, Number(it.discount) || 0));
+                const unit = Math.max(0, Number(it.unitPrice) || 0);
+                const discountedUnit = Math.round(unit * (1 - d / 100));
+                return (
+                  <div key={idx} className="flex gap-3">
+                    <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+                      {it.image ? (
+                        <img
+                          src={`${baseUrl}${it.image}`}
+                          alt={it.name}
+                          className="w-12 h-12 object-cover"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 bg-gray-300 rounded" />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-sm font-medium text-gray-900">{it.name}</h3>
+                      <p className="text-xs text-gray-500 mt-1">Qty. {it.qty}</p>
+                      {d > 0 && (
+                        <p className="text-xs text-green-600 mt-0.5">{d}% off</p>
+                      )}
+                    </div>
+                    <div className="text-right">
+                      <p className="text-lg font-bold text-gray-900">₹{currency(discountedUnit * it.qty)}</p>
+                      {d > 0 && (
+                        <p className="text-xs text-gray-400 line-through">₹{currency(unit * it.qty)}</p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
 
-            <div className="space-y-3">
+            {/* Extras */}
+            {/* <div className="space-y-3 mt-6">
               <button className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors">
                 <span className="text-sm text-gray-700">GST Number</span>
                 <span className="text-sm text-yellow-600 font-medium flex items-center gap-1">
                   Add <Plus className="w-4 h-4" />
                 </span>
               </button>
-              
+
               <button className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors">
                 <span className="text-sm text-gray-700">Order instructions</span>
                 <span className="text-sm text-yellow-600 font-medium flex items-center gap-1">
                   Add <Plus className="w-4 h-4" />
                 </span>
               </button>
+            </div> */}
+
+            {/* Totals */}
+            <div className="mt-6 border-t pt-4 space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Subtotal</span>
+                <span className="text-gray-900">₹{currency(subTotal)}</span>
+              </div>
+              {discountTotal > 0 && (
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Discount</span>
+                  <span className="text-green-600">- ₹{currency(discountTotal)}</span>
+                </div>
+              )}
+              <div className="flex justify-between">
+                <span className="text-gray-600">Shipping</span>
+                <span className="text-gray-900">{shipping === 0 ? "Free" : `₹${currency(shipping)}`}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">GST (est.)</span>
+                <span className="text-gray-900">₹{currency(tax)}</span>
+              </div>
+              <div className="flex justify-between text-base font-semibold pt-2">
+                <span className="text-gray-900">Total</span>
+                <span className="text-gray-900">₹{currency(grandTotal)}</span>
+              </div>
             </div>
           </div>
 
@@ -490,61 +607,72 @@ export default function CheckoutPage() {
           </div>
         </div>
 
+        {/* Right: Steps */}
         <div className="flex-1 bg-white rounded-2xl shadow-xl p-8">
+          {/* Step Indicator */}
           <div className="flex items-center gap-2 mb-8">
             <div className="flex items-center gap-2">
-              <span className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                currentStep === 'contact' 
-                  ? 'bg-pink-50 text-pink-600' 
-                  : 'bg-green-50 text-green-600'
-              }`}>
-                {currentStep === 'contact' ? 'Contact' : '✓ Contact'}
+              <span
+                className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                  currentStep === "contact" ? "bg-pink-50 text-pink-600" : "bg-green-50 text-green-600"
+                }`}
+              >
+                {currentStep === "contact" ? "Contact" : "✓ Contact"}
               </span>
               <ChevronRight className="w-4 h-4 text-gray-400" />
             </div>
             <div className="flex items-center gap-2">
-              <span className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                currentStep === 'address' 
-                  ? 'bg-pink-50 text-pink-600' 
-                  : currentStep === 'payment'
-                  ? 'bg-green-50 text-green-600'
-                  : 'text-gray-400'
-              }`}>
-                {currentStep === 'payment' ? '✓ Address' : 'Address'}
+              <span
+                className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                  currentStep === "address"
+                    ? "bg-pink-50 text-pink-600"
+                    : currentStep === "payment"
+                    ? "bg-green-50 text-green-600"
+                    : "text-gray-400"
+                }`}
+              >
+                {currentStep === "payment" ? "✓ Address" : "Address"}
               </span>
               <ChevronRight className="w-4 h-4 text-gray-400" />
             </div>
             <div className="flex items-center gap-2">
-              <span className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                currentStep === 'payment' 
-                  ? 'bg-pink-50 text-pink-600' 
-                  : 'text-gray-400'
-              }`}>
+              <span
+                className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                  currentStep === "payment" ? "bg-pink-50 text-pink-600" : "text-gray-400"
+                }`}
+              >
                 Payment
               </span>
             </div>
           </div>
 
-          {currentStep === 'contact' && renderContactForm()}
-          {currentStep === 'address' && renderAddressForm()}
-          {currentStep === 'payment' && renderPaymentForm()}
+          {currentStep === "contact" && renderContactForm()}
+          {currentStep === "address" && renderAddressForm()}
+          {currentStep === "payment" && renderPaymentForm()}
 
           <div className="mt-6 text-center">
             <p className="text-xs text-gray-500">
               <span className="inline-flex items-center gap-1">
                 <svg className="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
+                  <path
+                    fillRule="evenodd"
+                    d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
+                    clipRule="evenodd"
+                  />
                 </svg>
                 Money Back Promise by
-              </span>
-              {' '}
+              </span>{" "}
               <span className="font-bold">PayU</span>
             </p>
             <p className="text-xs text-gray-500 mt-2">
-              By proceeding, I agree to PayU's{' '}
-              <a href="#" className="text-blue-600 hover:underline">Privacy Notice</a>
-              {' • '}
-              <a href="#" className="text-blue-600 hover:underline">Edit Preferences</a>
+              By proceeding, I agree to PayU's{" "}
+              <a href="#" className="text-blue-600 hover:underline">
+                Privacy Notice
+              </a>{" "}
+              •{" "}
+              <a href="#" className="text-blue-600 hover:underline">
+                Edit Preferences
+              </a>
             </p>
           </div>
         </div>
