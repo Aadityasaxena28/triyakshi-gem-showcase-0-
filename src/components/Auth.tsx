@@ -3,119 +3,121 @@ import { LoginData, SignupData } from "@/DataTypes/Auth";
 import { toastError, toastSuccess } from "@/utlity/AlertSystem";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
 import "./Auth.css";
+
 type props = {
   state: string;
 };
 
-
-const Auth: React.FC<props>= ({state}) => {
+const Auth: React.FC<props> = ({ state }) => {
   const [activeTab, setActiveTab] = useState<"login" | "signup">("login");
+  const [isLoginLoading, setIsLoginLoading] = useState(false);
+  const [isSignupLoading, setIsSignupLoading] = useState(false);
   const Navigate = useNavigate();
+
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  e.preventDefault();
+
+  const phone = (document.getElementById("auth-loginPhone") as HTMLInputElement)?.value?.trim() || "";
+  const password = (document.getElementById("auth-loginPassword") as HTMLInputElement)?.value || "";
+  const country_code = (document.getElementById("auth-loginCountryCode") as HTMLInputElement)?.value || "+91";
   
-    const phone = (document.getElementById("auth-loginPhone") as HTMLInputElement)?.value?.trim() || "";
-    const password = (document.getElementById("auth-loginPassword") as HTMLInputElement)?.value || "";
-  
-    // basic validation
-    if (!/^\d{10}$/.test(phone)) {
-       toastError("Enter a valid 10-digit phone.");
-      return;
-    }
-    if (!password) {
-      toastError("Password is required.");
-      return;
-    }
-  
-    const payload: LoginData = {
-      phonenumber: `+91${phone}`,
-      password,
-      // email is optional; include it if you have an email field
-    };
-  
-    try {
-      const res = await Login(payload);
-  
-      // success path
-      if (res?.success) {
-        // Persist session (localStorage as requested)
-        if (res.token) localStorage.setItem("tg_token", res.token);
-        if (res.user) localStorage.setItem("tg_user", JSON.stringify(res.user));
-        
-  
-         toastSuccess(res.message || "Logged in successfully!");
-  
-        // Navigate to home (prefer useNavigate from react-router)
-        
-        Navigate("/home");
-        return;
-      }
-  
-      // backend returned success=false
-    toastError(res?.message || "Login failed.");
-    } catch (err: any) {
-      const msg = err?.message || "Login failed.";
-      toastError(msg);
-    }
+  // basic validation
+  if (!/^\d{10}$/.test(phone)) {
+    toastError("Enter a valid 10-digit phone.");
+    return;
+  }
+  if (!password) {
+    toastError("Password is required.");
+    return;
+  }
+
+  const payload: LoginData = {
+    phonenumber: Number(phone),
+    password,
   };
 
-  const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-  
-    const name = (document.getElementById("auth-signupName") as HTMLInputElement)?.value?.trim() || "";
-    const phone = (document.getElementById("auth-signupPhone") as HTMLInputElement)?.value?.trim() || "";
-    const email = (document.getElementById("auth-signupEmail") as HTMLInputElement)?.value?.trim() || "";
-    const password = (document.getElementById("auth-signupPassword") as HTMLInputElement)?.value || "";
-    const confirmPassword = (document.getElementById("auth-confirmPassword") as HTMLInputElement)?.value || "";
-  
-    if (!name) return toastError?.("Name is required.") ?? alert("Name is required.");
-    if (!/^\d{10}$/.test(phone)) return toastError?.("Enter a valid 10-digit phone.") ?? alert("Enter a valid 10-digit phone.");
-    if (!/^\S+@\S+\.\S+$/.test(email)) return toastError?.("Enter a valid email.") ?? alert("Enter a valid email.");
-    if (password.length < 6) return toastError?.("Password must be at least 6 characters.") ?? alert("Password must be at least 6 characters.");
-    if (password !== confirmPassword) return toastError?.("Passwords do not match!") ?? alert("Passwords do not match!");
-  
-    const payload: SignupData = {
-      username: name,
-      phonenumber: `+91${phone}`,
-      email,
-      password,
-    };
-  
-    try {
-      const res = await Signup(payload);
-  
-      if (res?.success) {
-        // Store token and user in localStorage
-        localStorage.setItem("tg_token", res.token);
-        localStorage.setItem("tg_user", JSON.stringify(res.user));
-      
-        if (toastSuccess) {
-          toastSuccess(res.message || "Account created successfully!");
-        } else {
-          alert("Signup successful!");
-        }
-      
-        Navigate("/home");
-      } 
-      else {
-        toastError(res?.message || "Signup failed.");
-      }
-    } catch (err: any) {
-      const msg = err?.message || "Signup failed.";
-      toastError(msg) 
+  setIsLoginLoading(true); // Start loading
+
+  try {
+    const res = await Login(payload);
+
+    // success path
+    if (res?.success) {
+      // Persist session
+      if (res.token) localStorage.setItem("tg_token", res.token);
+      if (res.user) localStorage.setItem("tg_user", JSON.stringify(res.user));
+
+      toastSuccess("Logged in successfully!");
+
+      // Navigate to home
+      Navigate("/home");
     }
-  };
+  } catch (err: any) {
+    // err is now the error message string
+    const errorMessage = typeof err === 'string' ? err : err?.message || "Login failed.";
+    console.error("Login error:", errorMessage);
+    toastError(errorMessage);
+  } finally {
+    setIsLoginLoading(false); // Stop loading
+  }
+};
+
+const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+
+  const name = (document.getElementById("auth-signupName") as HTMLInputElement)?.value?.trim() || "";
+  const phone = (document.getElementById("auth-signupPhone") as HTMLInputElement)?.value?.trim() || "";
+  const email = (document.getElementById("auth-signupEmail") as HTMLInputElement)?.value?.trim() || "";
+  const password = (document.getElementById("auth-signupPassword") as HTMLInputElement)?.value || "";
+  const confirmPassword = (document.getElementById("auth-confirmPassword") as HTMLInputElement)?.value || "";
+  const country_code = (document.getElementById("auth-signupCountryCode") as HTMLInputElement)?.value || "+91";
   
+  if (!name) return toastError("Name is required.");
+  if (!/^\d{10}$/.test(phone)) return toastError("Enter a valid 10-digit phone.");
+  if (!/^\S+@\S+\.\S+$/.test(email)) return toastError("Enter a valid email.");
+  if (password.length < 6) return toastError("Password must be at least 6 characters.");
+  if (password !== confirmPassword) return toastError("Passwords do not match!");
+
+  const payload: SignupData = {
+    username: name,
+    phonenumber: Number(phone),
+    country_code: country_code,
+    email,
+    password,
+  };
+
+  setIsSignupLoading(true); // Start loading
+
+  try {
+    const res = await Signup(payload);
+
+    if (res?.success) {
+      // Store token and user in localStorage
+      localStorage.setItem("tg_token", res.token);
+      localStorage.setItem("tg_user", JSON.stringify(res.user));
+
+      toastSuccess("Account created successfully!");
+      Navigate("/home");
+    }
+  } catch (err: any) {
+    // err is now the error message string
+    const errorMessage = typeof err === 'string' ? err : err?.message || "Signup failed.";
+    console.error("Signup error:", errorMessage);
+    toastError(errorMessage);
+  } finally {
+    setIsSignupLoading(false); // Stop loading
+  }
+};
   useEffect(() => {
     if (state === "login" || state === "signup") {
       setActiveTab(state);
     }
-  }
-  , [state]);
+  }, [state]);
 
   return (
-    <div className="auth_body" >
+    <div className="auth_body">
       <div className="auth-container" id="auth-container">
         <div className="auth-logo" id="auth-logo">
           <h1>✦ TRIAKSHI GEMS ✦</h1>
@@ -132,6 +134,7 @@ const Auth: React.FC<props>= ({state}) => {
             onClick={() => setActiveTab("login")}
             id="auth-tab-login"
             type="button"
+            disabled={isLoginLoading || isSignupLoading}
           >
             Login
           </button>
@@ -140,6 +143,7 @@ const Auth: React.FC<props>= ({state}) => {
             onClick={() => setActiveTab("signup")}
             id="auth-tab-signup"
             type="button"
+            disabled={isLoginLoading || isSignupLoading}
           >
             Sign Up
           </button>
@@ -159,8 +163,10 @@ const Auth: React.FC<props>= ({state}) => {
                 <input
                   type="text"
                   className="auth-input auth-country-code"
-                  value="+91"
-                  readOnly
+                  placeholder="+91"
+
+                  required
+                  // readOnly
                   id="auth-loginCountryCode"
                 />
                 <input
@@ -170,6 +176,7 @@ const Auth: React.FC<props>= ({state}) => {
                   placeholder="Enter your phone number"
                   required
                   pattern="[0-9]{10}"
+                  disabled={isLoginLoading}
                 />
               </div>
             </div>
@@ -184,11 +191,24 @@ const Auth: React.FC<props>= ({state}) => {
                 className="auth-input"
                 placeholder="Enter your password"
                 required
+                disabled={isLoginLoading}
               />
             </div>
 
-            <button type="submit" className="auth-submit-btn" id="auth-loginSubmit">
-              Login
+            <button
+              type="submit"
+              className="auth-submit-btn"
+              id="auth-loginSubmit"
+              disabled={isLoginLoading}
+            >
+              {isLoginLoading ? (
+                <>
+                  <span className="auth-spinner"></span>
+                  Logging in...
+                </>
+              ) : (
+                "Login"
+              )}
             </button>
 
             <div className="auth-forgot-link" id="auth-forgot">
@@ -213,6 +233,7 @@ const Auth: React.FC<props>= ({state}) => {
                 className="auth-input"
                 placeholder="Enter your full name"
                 required
+                disabled={isSignupLoading}
               />
             </div>
             <div className="auth-form-group">
@@ -225,6 +246,7 @@ const Auth: React.FC<props>= ({state}) => {
                 className="auth-input"
                 placeholder="ravi32@gmail.com"
                 required
+                disabled={isSignupLoading}
               />
             </div>
             <div className="auth-form-group">
@@ -235,9 +257,10 @@ const Auth: React.FC<props>= ({state}) => {
                 <input
                   type="text"
                   className="auth-input auth-country-code"
-                  value="+91"
-                  readOnly
+                  placeholder="+91"
                   id="auth-signupCountryCode"
+                  disabled={isSignupLoading}
+                  required
                 />
                 <input
                   type="tel"
@@ -246,6 +269,7 @@ const Auth: React.FC<props>= ({state}) => {
                   placeholder="Enter your phone number"
                   required
                   pattern="[0-9]{10}"
+                  disabled={isSignupLoading}
                 />
               </div>
             </div>
@@ -261,6 +285,7 @@ const Auth: React.FC<props>= ({state}) => {
                 placeholder="Create a password"
                 required
                 minLength={6}
+                disabled={isSignupLoading}
               />
             </div>
 
@@ -275,15 +300,29 @@ const Auth: React.FC<props>= ({state}) => {
                 placeholder="Confirm your password"
                 required
                 minLength={6}
+                disabled={isSignupLoading}
               />
             </div>
 
-            <button type="submit" className="auth-submit-btn" id="auth-signupSubmit">
-              Create Account
+            <button
+              type="submit"
+              className="auth-submit-btn"
+              id="auth-signupSubmit"
+              disabled={isSignupLoading}
+            >
+              {isSignupLoading ? (
+                <>
+                  <span className="auth-spinner"></span>
+                  Creating Account...
+                </>
+              ) : (
+                "Create Account"
+              )}
             </button>
           </form>
         </div>
       </div>
+      <ToastContainer/>
     </div>
   );
 };

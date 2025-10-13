@@ -9,6 +9,7 @@ const options = {
   draggable: true,
   hideProgressBar: false,
   closeOnClick: true,
+  zIndex: 1000
 };
 
 // Success alert

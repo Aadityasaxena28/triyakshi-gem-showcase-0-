@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Minus, Plus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Loader from "../General/Loader";
 
 const Cart = () => {
   const [cartItems, setCartItems] = useState<CartItemInfo[]>([]);
@@ -106,6 +107,7 @@ const Cart = () => {
       toastError(error);
     }
   };
+  
 
   const updateQuantity = (productId: string, change: number) => {
     setCartItems((prev) =>
@@ -156,9 +158,7 @@ const Cart = () => {
   if (isLoading) {
     return (
       <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-lg shadow-lg p-8 text-center">
-          <p className="text-gray-600">Loading your cart…</p>
-        </div>
+        <Loader/>
       </div>
     );
   }

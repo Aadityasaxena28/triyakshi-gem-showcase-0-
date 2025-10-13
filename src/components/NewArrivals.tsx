@@ -6,69 +6,74 @@ import {
   ShoppingCart,
   CreditCard,
   Sparkles,
+  Package,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const ProductSlider = () => {
-  const [currentSlide, setCurrentSlide] = useState(0);
+const NewArrivals = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const discountedProducts = [
+  const newProducts = [
     {
       id: 1,
       name: "Blue Sapphire Ring",
-      originalPrice: 2500,
-      discountedPrice: 1750,
-      discount: 30,
+      price: 2500,
       rating: 4.8,
       reviews: 124,
+      isNew: true,
       image:
         "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop",
     },
     {
       id: 2,
       name: "Amethyst Healing Crystal",
-      originalPrice: 800,
-      discountedPrice: 560,
-      discount: 30,
+      price: 800,
       rating: 4.9,
       reviews: 89,
+      isNew: true,
       image:
         "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=400&h=400&fit=crop",
     },
     {
       id: 3,
       name: "Rudraksha Mala Beads",
-      originalPrice: 1200,
-      discountedPrice: 840,
-      discount: 30,
+      price: 1200,
       rating: 4.7,
       reviews: 156,
+      isNew: true,
       image:
         "https://images.unsplash.com/photo-1573408301185-9146fe634ad0?w=400&h=400&fit=crop",
     },
     {
       id: 4,
       name: "Rose Quartz Pendant",
-      originalPrice: 600,
-      discountedPrice: 420,
-      discount: 30,
+      price: 600,
       rating: 4.6,
       reviews: 78,
+      isNew: true,
       image:
         "https://images.unsplash.com/photo-1602173574767-37ac01994b2a?w=400&h=400&fit=crop",
     },
     {
       id: 5,
       name: "Citrine Prosperity Stone",
-      originalPrice: 450,
-      discountedPrice: 315,
-      discount: 30,
+      price: 450,
       rating: 4.8,
       reviews: 92,
+      isNew: true,
       image:
         "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=400&h=400&fit=crop",
+    },
+    {
+      id: 6,
+      name: "Black Tourmaline Protection",
+      price: 950,
+      rating: 4.9,
+      reviews: 103,
+      isNew: true,
+      image:
+        "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop",
     },
   ];
 
@@ -76,7 +81,7 @@ const ProductSlider = () => {
     if (scrollRef.current) {
       const scrollWidth = scrollRef.current.scrollWidth - scrollRef.current.clientWidth;
       const scrollLeft = scrollRef.current.scrollLeft;
-      const progress = (scrollLeft / scrollWidth) * 100;
+      const progress = scrollWidth > 0 ? (scrollLeft / scrollWidth) * 100 : 0;
       setScrollProgress(progress);
     }
   };
@@ -103,16 +108,16 @@ const ProductSlider = () => {
     <section className="py-16 bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 relative overflow-hidden">
       {/* Decorative elements */}
       <div className="absolute top-0 left-0 w-full h-full opacity-10">
-        <div className="absolute top-10 left-10 w-20 h-20 bg-orange-400 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-20 w-32 h-32 bg-amber-400 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute top-1/2 left-1/3 w-24 h-24 bg-yellow-400 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-10 right-10 w-20 h-20 bg-orange-400 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 left-20 w-32 h-32 bg-amber-400 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-1/2 right-1/3 w-24 h-24 bg-yellow-400 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Header with animated gradient text */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <Sparkles className="w-8 h-8 text-orange-500 animate-pulse" />
+            <Package className="w-8 h-8 text-orange-500 animate-pulse" />
             <h2 className="text-5xl font-extrabold relative inline-block">
               <span 
                 className="bg-gradient-to-r from-orange-600 via-amber-500 to-yellow-500 bg-clip-text text-transparent animate-gradient bg-[length:200%_200%]"
@@ -121,17 +126,17 @@ const ProductSlider = () => {
                   animation: 'gradient 3s ease infinite',
                 }}
               >
-                Diwali Sale
+                New Arrivals
               </span>
             </h2>
-            <Sparkles className="w-8 h-8 text-orange-500 animate-pulse" style={{ animationDelay: '0.5s' }} />
+            <Package className="w-8 h-8 text-orange-500 animate-pulse" style={{ animationDelay: '0.5s' }} />
           </div>
           <p className="text-gray-700 text-lg font-medium max-w-2xl mx-auto">
-            ✨ Limited time offers on premium gemstones, Rudraksha, Mala and Bracelets! ✨
+            ✨ Discover our latest collection of precious gemstones and spiritual items ✨
           </p>
-          <div className="mt-4 inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white px-6 py-2 rounded-full text-sm font-semibold shadow-lg animate-bounce">
+          <div className="mt-4 inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white px-6 py-2 rounded-full text-sm font-semibold shadow-lg">
             <Sparkles className="w-4 h-4" />
-            <span>Up to 30% OFF</span>
+            <span>Just Arrived</span>
             <Sparkles className="w-4 h-4" />
           </div>
         </div>
@@ -166,7 +171,7 @@ const ProductSlider = () => {
             msOverflowStyle: 'none',
           }}
         >
-          {discountedProducts.map((product, index) => (
+          {newProducts.map((product, index) => (
             <div
               key={product.id}
               className="min-w-[280px] max-w-[280px] flex-shrink-0 bg-white border-2 border-orange-200 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer hover:-translate-y-2 relative overflow-hidden"
@@ -174,9 +179,9 @@ const ProductSlider = () => {
                 scrollSnapAlign: "start",
               }}
             >
-              {/* Discount Badge */}
-              <div className="absolute top-3 left-3 bg-gradient-to-r from-orange-500 to-red-500 text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg z-10 animate-pulse">
-                {product.discount}% OFF
+              {/* NEW Badge */}
+              <div className="absolute top-3 left-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg z-10 animate-pulse">
+                NEW
               </div>
 
               {/* Festive corner decoration */}
@@ -218,10 +223,7 @@ const ProductSlider = () => {
                 {/* Price */}
                 <div className="flex items-baseline space-x-2 mb-4">
                   <span className="text-2xl font-extrabold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
-                    ₹{product.discountedPrice}
-                  </span>
-                  <span className="text-base text-gray-500 line-through">
-                    ₹{product.originalPrice}
+                    ₹{product.price}
                   </span>
                 </div>
 
@@ -257,8 +259,6 @@ const ProductSlider = () => {
             </div>
           </div>
         </div>
-
-
       </div>
 
       <style>{`
@@ -282,4 +282,4 @@ const ProductSlider = () => {
   );
 };
 
-export default ProductSlider;
+export default NewArrivals;

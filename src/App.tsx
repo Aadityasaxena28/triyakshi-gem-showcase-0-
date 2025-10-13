@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Auth from "./components/Auth";
 import BraceletPage from "./components/BraceletPage";
-import CheckoutPage from "./components/checkout_page";
+import CheckoutPage from "./components/Checkout/checkout_page";
 import GemstoneCalculator from "./components/GemstoneCalculator";
 import GemstonesPage from "./components/gemstones-category-page";
 import Home from "./components/Home";
@@ -49,7 +49,9 @@ const App = () => (
           <Route path="checkout" element= {<CheckoutPage/>}/>
           {/*For Buy now functionality*/}
           <Route path="checkout/:id" element= {<CheckoutPage/>}/>
-          <Route path="/profile" element={<ProfilePage/>}/>
+          <Route path="/profile" element={<ProfilePage option="profile"/>}/>
+          <Route path="/cart" element={<ProfilePage option="cart"/>}/>
+          <Route path="/refer-earn" element={<ProfilePage option="refer"/>}/>
           </Route>
           </Route>
           <Route path="*" element={<NotFound />} />

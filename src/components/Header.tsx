@@ -13,27 +13,28 @@ const Header: React.FC = () => {
   const [isCalcOpen, setIsCalcOpen] = useState<boolean>(false);
   const [isAboutOpen, setIsAboutOpen] = useState<boolean>(false);
   const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
-  
+
   const calcTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const aboutTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const profileTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Simple login check (replace with auth context if needed)
   const isLoggedIn: boolean = !!localStorage.getItem("tg_user");
-  console.log(localStorage.getItem("tg_user"));
+  const navigate = useNavigate();
 
+  // 🟢 Updated menu items (Bracelets removed, Mala renamed)
   const menuItems: MenuItem[] = [
     { name: "Gemstones", path: "/gemstones" },
     { name: "Rudraksh", path: "/rudraksha" },
-    { name: "Bracelets", path: "/bracelets" },
-    { name: "Mala", path: "/mala" },
+    { name: "Mala & Bracelets", path: "/mala" },
     { name: "Refer & Earn", path: "/refer-earn" },
   ];
 
   const calculatorItems: MenuItem[] = [
-    { name: "Gemstone Calculator", path: "/gemstone-calculator" },
-    { name: "Health Calculator", path: "/health-calculator" },
+    { name: "Life Stone Calculator", path: "/gemstone-calculator" },
+    { name: "Health Stone Calculator", path: "/health-calculator" },
     { name: "Lucky Stone Calculator", path: "/lucky-stone-calculator" },
+    { name: "Rudraksh Calculator", path: "/health-calculator" },
+    { name: "GemStone Report", path: "/health-calculator" },
   ];
 
   const aboutItems: MenuItem[] = [
@@ -47,14 +48,9 @@ const Header: React.FC = () => {
     { name: "Refer & Earn", path: "/refer-earn", icon: Share2 },
   ];
 
-  const navigate = useNavigate();
-
   const handleAuthClick = (): void => {
-    if (!isLoggedIn) {
-      navigate("/login");
-    } else {
-      setIsProfileOpen(!isProfileOpen);
-    }
+    if (!isLoggedIn) navigate("/login");
+    else setIsProfileOpen(!isProfileOpen);
   };
 
   const handleLogout = (): void => {
@@ -63,7 +59,6 @@ const Header: React.FC = () => {
     navigate("/");
   };
 
-  // Calculator dropdown hover logic
   const handleCalcMouseEnter = (): void => {
     if (calcTimerRef.current) clearTimeout(calcTimerRef.current);
     setIsCalcOpen(true);
@@ -72,12 +67,9 @@ const Header: React.FC = () => {
   };
 
   const handleCalcMouseLeave = (): void => {
-    calcTimerRef.current = setTimeout(() => {
-      setIsCalcOpen(false);
-    }, 300);
+    calcTimerRef.current = setTimeout(() => setIsCalcOpen(false), 300);
   };
 
-  // About Us dropdown hover logic
   const handleAboutMouseEnter = (): void => {
     if (aboutTimerRef.current) clearTimeout(aboutTimerRef.current);
     setIsAboutOpen(true);
@@ -86,12 +78,9 @@ const Header: React.FC = () => {
   };
 
   const handleAboutMouseLeave = (): void => {
-    aboutTimerRef.current = setTimeout(() => {
-      setIsAboutOpen(false);
-    }, 300);
+    aboutTimerRef.current = setTimeout(() => setIsAboutOpen(false), 300);
   };
 
-  // Profile dropdown hover logic
   const handleProfileMouseEnter = (): void => {
     if (profileTimerRef.current) clearTimeout(profileTimerRef.current);
     if (isLoggedIn) {
@@ -102,9 +91,7 @@ const Header: React.FC = () => {
   };
 
   const handleProfileMouseLeave = (): void => {
-    profileTimerRef.current = setTimeout(() => {
-      setIsProfileOpen(false);
-    }, 300);
+    profileTimerRef.current = setTimeout(() => setIsProfileOpen(false), 300);
   };
 
   const handleDropdownItemClick = () => {
@@ -114,7 +101,7 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-border/20 shadow-card">
+    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-border/20 shadow-card overflow-visible">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -123,9 +110,7 @@ const Header: React.FC = () => {
               <div className="bg-gradient-primary p-2 rounded-xl shadow-elegant">
                 <Gem className="h-4 w-4 text-white" />
               </div>
-              <span className="text-xl font-bold text-gradient">
-                Triyakshi Gems
-              </span>
+              <span className="text-xl font-bold text-gradient">Triakshi Gems</span>
             </Link>
           </div>
 
@@ -224,7 +209,7 @@ const Header: React.FC = () => {
                 >
                   <User className="h-5 w-5" />
                 </Button>
-                
+
                 {isProfileOpen && (
                   <div className="absolute right-0 bg-white shadow-lg rounded-xl mt-2 w-52 border border-border/20 py-2">
                     {profileItems.map((item) => {
@@ -260,99 +245,9 @@ const Header: React.FC = () => {
             className="md:hidden p-2 rounded-lg hover:bg-secondary transition-smooth"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
-            {isMenuOpen ? (
-              <X className="h-4 w-4 text-foreground" />
-            ) : (
-              <Menu className="h-4 w-4 text-foreground" />
-            )}
+            {isMenuOpen ? <X className="h-4 w-4 text-foreground" /> : <Menu className="h-4 w-4 text-foreground" />}
           </button>
         </div>
-
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-border/20">
-            <nav className="flex flex-col space-y-3">
-              {menuItems.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.path}
-                  className="text-foreground hover:text-primary transition-smooth py-2 px-4 rounded-lg hover:bg-secondary"
-                >
-                  {item.name}
-                </Link>
-              ))}
-
-              <div className="flex flex-col space-y-1 border-t pt-2 border-border/20">
-                <span className="px-4 py-2 font-medium text-foreground">
-                  Calculator
-                </span>
-                {calculatorItems.map((calc) => (
-                  <Link
-                    key={calc.name}
-                    to={calc.path}
-                    className="text-foreground hover:text-primary transition-smooth py-2 px-6 rounded-lg hover:bg-secondary text-sm"
-                  >
-                    {calc.name}
-                  </Link>
-                ))}
-              </div>
-
-              <div className="flex flex-col space-y-1 border-t pt-2 border-border/20">
-                <span className="px-4 py-2 font-medium text-foreground">
-                  About Us
-                </span>
-                {aboutItems.map((item) => (
-                  <Link
-                    key={item.name}
-                    to={item.path}
-                    className="text-foreground hover:text-primary transition-smooth py-2 px-6 rounded-lg hover:bg-secondary text-sm"
-                  >
-                    {item.name}
-                  </Link>
-                ))}
-              </div>
-
-              <div className="flex flex-col space-y-2 pt-4 border-t border-border/20">
-                <Button className="bg-red-500 text-white rounded-xl hover:bg-red-600">
-                  NEW
-                </Button>
-                <Button className="btn-primary">On Sale</Button>
-
-                {!isLoggedIn ? (
-                  <Button
-                    className="btn-primary rounded-full"
-                    onClick={handleAuthClick}
-                  >
-                    Login/SignUp
-                  </Button>
-                ) : (
-                  <>
-                    {profileItems.map((item) => {
-                      const Icon = item.icon;
-                      return (
-                        <Link
-                          key={item.name}
-                          to={item.path}
-                          className="flex items-center space-x-3 text-foreground hover:text-primary transition-smooth py-2 px-4 rounded-lg hover:bg-secondary"
-                        >
-                          <Icon className="h-4 w-4" />
-                          <span>{item.name}</span>
-                        </Link>
-                      );
-                    })}
-                    <button
-                      onClick={handleLogout}
-                      className="flex items-center space-x-3 text-red-600 hover:text-red-700 transition-smooth py-2 px-4 rounded-lg hover:bg-red-50 text-left"
-                    >
-                      <LogOut className="h-4 w-4" />
-                      <span>Log Out</span>
-                    </button>
-                  </>
-                )}
-              </div>
-            </nav>
-          </div>
-        )}
       </div>
     </header>
   );

@@ -29,6 +29,7 @@ export async function getProducts({page=0,category="gemstone",type="all", produc
     throw new Error("Failed to fetch products" + error);
   }
 }
+
 export async function getProductById(id: string):Promise<Product> {
   try{ 
     console.log("Fetching product with ID:", id);
@@ -43,5 +44,9 @@ export async function getProductById(id: string):Promise<Product> {
     throw new Error("Failed to fetch product by ID" + error);
   } 
 }
+
+export async function getAllCategories(){
+  // Need to be implemented
+};
 
 
