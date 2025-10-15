@@ -24,7 +24,7 @@ const ProductSlider = () => {
       rating: 4.8,
       reviews: 124,
       image:
-        "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop",
+        "",
     },
     {
       id: 2,
@@ -35,7 +35,7 @@ const ProductSlider = () => {
       rating: 4.9,
       reviews: 89,
       image:
-        "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=400&h=400&fit=crop",
+        "",
     },
     {
       id: 3,
@@ -46,7 +46,7 @@ const ProductSlider = () => {
       rating: 4.7,
       reviews: 156,
       image:
-        "https://images.unsplash.com/photo-1573408301185-9146fe634ad0?w=400&h=400&fit=crop",
+        "",
     },
     {
       id: 4,
@@ -57,7 +57,7 @@ const ProductSlider = () => {
       rating: 4.6,
       reviews: 78,
       image:
-        "https://images.unsplash.com/photo-1602173574767-37ac01994b2a?w=400&h=400&fit=crop",
+        "",
     },
     {
       id: 5,
@@ -68,7 +68,7 @@ const ProductSlider = () => {
       rating: 4.8,
       reviews: 92,
       image:
-        "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=400&h=400&fit=crop",
+        "",
     },
   ];
 

@@ -23,7 +23,7 @@ const NewArrivals = () => {
       reviews: 124,
       isNew: true,
       image:
-        "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop",
+        "",
     },
     {
       id: 2,
@@ -33,7 +33,7 @@ const NewArrivals = () => {
       reviews: 89,
       isNew: true,
       image:
-        "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=400&h=400&fit=crop",
+        "",
     },
     {
       id: 3,
@@ -43,7 +43,7 @@ const NewArrivals = () => {
       reviews: 156,
       isNew: true,
       image:
-        "https://images.unsplash.com/photo-1573408301185-9146fe634ad0?w=400&h=400&fit=crop",
+        "",
     },
     {
       id: 4,
@@ -53,7 +53,7 @@ const NewArrivals = () => {
       reviews: 78,
       isNew: true,
       image:
-        "https://images.unsplash.com/photo-1602173574767-37ac01994b2a?w=400&h=400&fit=crop",
+        "",
     },
     {
       id: 5,
@@ -63,7 +63,7 @@ const NewArrivals = () => {
       reviews: 92,
       isNew: true,
       image:
-        "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=400&h=400&fit=crop",
+        "",
     },
     {
       id: 6,
@@ -73,7 +73,7 @@ const NewArrivals = () => {
       reviews: 103,
       isNew: true,
       image:
-        "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop",
+        "",
     },
   ];
 

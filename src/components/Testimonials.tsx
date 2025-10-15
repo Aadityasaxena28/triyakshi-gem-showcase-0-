@@ -11,7 +11,7 @@ const Testimonials = () => {
       review:
         "The blue sapphire I purchased has brought incredible clarity to my life. The quality is exceptional and the energy is truly transformative.",
       avatar:
-        "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face",
+        "",
     },
     {
       id: 2,
@@ -21,7 +21,7 @@ const Testimonials = () => {
       review:
         "Amazing collection of rudraksha beads! The spiritual energy and authenticity is unmatched. Highly recommend for anyone on a spiritual journey.",
       avatar:
-        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
+        "",
     },
     {
       id: 3,
@@ -31,7 +31,7 @@ const Testimonials = () => {
       review:
         "The health calculator feature helped me choose the perfect gemstone. My stress levels have reduced significantly since wearing the recommended stone.",
       avatar:
-        "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
+        "",
     },
     {
       id: 4,
@@ -41,7 +41,7 @@ const Testimonials = () => {
       review:
         "Excellent customer service and authentic products. The lucky charms I bought have definitely improved my business prospects!",
       avatar:
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
+        "",
     },
     {
       id: 5,
@@ -51,7 +51,7 @@ const Testimonials = () => {
       review:
         "The gemstone consultation was spot-on! The energy of the stone has brought peace and prosperity into my life.",
       avatar:
-        "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face",
+        "",
     },
     {
       id: 6,
@@ -61,7 +61,7 @@ const Testimonials = () => {
       review:
         "The delivery was quick and the gemstone came with proper certification. Great experience overall!",
       avatar:
-        "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=100&h=100&fit=crop&crop=face",
+        "",
     },
   ];
 

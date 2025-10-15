@@ -57,25 +57,25 @@ const NewCategories = () => {
           name: "Citrine Success Stone",
           price: 850,
           image:
-            "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=300&h=300&fit=crop",
+            "",
         },
         {
           name: "Tiger Eye Confidence",
           price: 650,
           image:
-            "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=300&h=300&fit=crop",
+            "",
         },
         {
           name: "Pyrite Abundance",
           price: 750,
           image:
-            "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=300&h=300&fit=crop",
+            "",
         },
         {
           name: "Green Aventurine Luck",
           price: 550,
           image:
-            "https://images.unsplash.com/photo-1602173574767-37ac01994b2a?w=300&h=300&fit=crop",
+            "",
         },
       ],
     },
@@ -89,25 +89,25 @@ const NewCategories = () => {
           name: "Fluorite Focus Stone",
           price: 600,
           image:
-            "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=300&h=300&fit=crop",
+            "",
         },
         {
           name: "Clear Quartz Clarity",
           price: 500,
           image:
-            "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=300&h=300&fit=crop",
+            "",
         },
         {
           name: "Amethyst Wisdom",
           price: 700,
           image:
-            "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=300&h=300&fit=crop",
+            "",
         },
         {
           name: "Sodalite Intelligence",
           price: 450,
           image:
-            "https://images.unsplash.com/photo-1602173574767-37ac01994b2a?w=300&h=300&fit=crop",
+            "",
         },
       ],
     },
@@ -121,25 +121,25 @@ const NewCategories = () => {
           name: "Rose Quartz Love",
           price: 550,
           image:
-            "https://images.unsplash.com/photo-1602173574767-37ac01994b2a?w=300&h=300&fit=crop",
+            "",
         },
         {
           name: "Moonstone Romance",
           price: 800,
           image:
-            "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=300&h=300&fit=crop",
+            "",
         },
         {
           name: "Garnet Passion",
           price: 900,
           image:
-            "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=300&h=300&fit=crop",
+            "",
         },
         {
           name: "Rhodonite Healing",
           price: 650,
           image:
-            "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=300&h=300&fit=crop",
+            "",
         },
       ],
     },
@@ -153,25 +153,25 @@ const NewCategories = () => {
           name: "Bloodstone Vitality",
           price: 700,
           image:
-            "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=300&h=300&fit=crop",
+            "",
         },
         {
           name: "Carnelian Energy",
           price: 600,
           image:
-            "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=300&h=300&fit=crop",
+            "",
         },
         {
           name: "Jade Wellness",
           price: 850,
           image:
-            "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=300&h=300&fit=crop",
+            "",
         },
         {
           name: "Hematite Grounding",
           price: 500,
           image:
-            "https://images.unsplash.com/photo-1602173574767-37ac01994b2a?w=300&h=300&fit=crop",
+            "",
         },
       ],
     },
@@ -185,25 +185,25 @@ const NewCategories = () => {
           name: "Pyrite Prosperity",
           price: 750,
           image:
-            "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=300&h=300&fit=crop",
+            "",
         },
         {
           name: "Citrine Wealth Stone",
           price: 850,
           image:
-            "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=300&h=300&fit=crop",
+            "",
         },
         {
           name: "Green Jade Fortune",
           price: 900,
           image:
-            "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=300&h=300&fit=crop",
+            "",
         },
         {
           name: "Tiger Eye Abundance",
           price: 650,
           image:
-            "https://images.unsplash.com/photo-1602173574767-37ac01994b2a?w=300&h=300&fit=crop",
+            "",
         },
       ],
     },
