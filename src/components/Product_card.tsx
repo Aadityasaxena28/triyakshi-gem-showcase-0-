@@ -43,8 +43,36 @@ const THEME: Record<
     btnHoverFrom: "hover:from-yellow-500",
     btnHoverTo: "hover:to-yellow-600",
   },
-  // Extracted/adjusted palette for Rudraksha (earthy amber/orange tones)
+
   rudraksha: {
+    bandFrom: "from-amber-50",
+    bandTo: "to-amber-100",
+    overlayFrom: "from-amber-500/20",
+    overlayTo: "to-orange-700/20",
+    idPill: "bg-amber-100 text-amber-800",
+    catPillBg: "bg-amber-50 text-amber-800",
+    offBadge: "bg-red-600 text-white",
+    btnFrom: "from-amber-600",
+    btnTo: "to-orange-600",
+    btnHoverFrom: "hover:from-amber-700",
+    btnHoverTo: "hover:to-orange-700",
+  },
+
+  mala: {
+    bandFrom: "from-amber-50",
+    bandTo: "to-amber-100",
+    overlayFrom: "from-amber-500/20",
+    overlayTo: "to-orange-700/20",
+    idPill: "bg-amber-100 text-amber-800",
+    catPillBg: "bg-amber-50 text-amber-800",
+    offBadge: "bg-red-600 text-white",
+    btnFrom: "from-amber-600",
+    btnTo: "to-orange-600",
+    btnHoverFrom: "hover:from-amber-700",
+    btnHoverTo: "hover:to-orange-700",
+  },
+
+  bracelet: {
     bandFrom: "from-amber-50",
     bandTo: "to-amber-100",
     overlayFrom: "from-amber-500/20",
@@ -59,16 +87,14 @@ const THEME: Record<
   },
 };
 
+import { Diamond } from 'lucide-react';
+
 const Product_card: React.FC<Props> = ({
   product,
   handleViewDetails,
   category = "gemstones",
 }) => {
   const theme = THEME[category] ?? THEME.gemstones;
-
-  const categoryLabel = product.type.includes("precious")
-    ? "Precious"
-    : "Semi-Precious";
 
   // FIX: your previous discount calc was always 0%.
   // Assuming `product.discount` is a percentage.
@@ -85,9 +111,12 @@ const Product_card: React.FC<Props> = ({
      console.log("Image inside",product.images[0])
   }
   else if(product.image){
-    imageSrc = `${baseUrl}${product.image}`; ;
-
+    imageSrc = `${baseUrl}${product.image}`;
   }
+
+  // Get rating from product, default to 5 if not available
+  const rating = product.rating ?? 5;
+  // const maxRating = 5;
 
   return (
     <div className="bg-white rounded-2xl shadow-card hover:shadow-elegant transition-all duration-300 hover:scale-105 overflow-hidden group">
@@ -127,14 +156,17 @@ const Product_card: React.FC<Props> = ({
       <div className="p-6">
         <div className="flex items-start justify-between mb-2">
           <h3 className="text-xl font-bold text-gray-800">{product.name}</h3>
-          <span
-            className={[
-              "text-xs px-2 py-1 rounded-full font-semibold",
-              theme.idPill,
-            ].join(" ")}
-          >
-            {product.id}
-          </span>
+          
+          {/* Rating Display with Diamond Icon */}
+          <div className="flex items-center gap-1 bg-gradient-to-r from-amber-50 to-yellow-50 px-3 py-1.5 rounded-full border border-amber-200">
+            <Diamond className="w-4 h-4 text-amber-500 fill-amber-500" />
+            <span className="text-sm font-bold text-amber-700">
+              {Number(rating.toFixed(1))}
+            </span>
+            {/* <span className="text-xs text-amber-600">
+              /{maxRating}
+            </span> */}
+          </div>
         </div>
 
         <p className="text-sm text-gray-600 mb-3">{product.description}</p>
@@ -144,17 +176,19 @@ const Product_card: React.FC<Props> = ({
           <span className="text-sm text-gray-600">{product.quantity}</span>
         </div>
 
-        {category=="gemstone"&&(<div className="flex items-center gap-2 mb-3">
-          <span
-            className={[
-              "text-xs px-3 py-1 rounded-full",
-              theme.catPillBg,
-              theme.catPillText || "",
-            ].join(" ")}
-          >
-            {categoryLabel}
-          </span>
-        </div>)}
+        {/* {category === "gemstone" && (
+          <div className="flex items-center gap-2 mb-3">
+            <span
+              className={[
+                "text-xs px-3 py-1 rounded-full",
+                theme.catPillBg,
+                theme.catPillText || "",
+              ].join(" ")}
+            >
+              {categoryLabel}
+            </span>
+          </div>
+        )} */}
 
         <div className="flex items-end gap-2 mb-4">
           <span className="text-2xl font-bold text-gray-900">
