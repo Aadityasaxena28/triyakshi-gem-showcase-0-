@@ -1,6 +1,9 @@
+import { addToCart } from '@/API/Cart';
 import { getDiscountedProducts } from '@/API/Product';
 import { Button } from '@/components/ui/button';
+import { CartItem } from '@/DataTypes/CartData';
 import { Product } from '@/DataTypes/product';
+import { toastError, toastSuccess } from '@/utlity/AlertSystem';
 import { useQuery } from '@tanstack/react-query';
 import {
   ChevronLeft,
@@ -23,19 +26,19 @@ const ProductSlider = () => {
   const { data: products = [], isLoading, isError } = useQuery({
     queryKey: ['discounted-products'],
     queryFn: () => getDiscountedProducts({
-      category: '', // Leave empty to get all categories
-      type: '',     // Leave empty to get all types
-      count: 10,    // Number of products to fetch
-      discount: 13  // Minimum discount percentage (10% or more)
+      category: '',
+      type: '',
+      count: 10,
+      discount: 14
     }),
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    staleTime: 1000 * 60 * 5,
   });
 
-  const handleScroll = () => {
+  const updateScrollProgress = () => {
     if (scrollRef.current) {
       const scrollWidth = scrollRef.current.scrollWidth - scrollRef.current.clientWidth;
       const scrollLeft = scrollRef.current.scrollLeft;
-      const progress = scrollWidth > 0 ? (scrollLeft / scrollWidth) * 100 : 0;
+      const progress = scrollWidth > 0 ? Math.min(100, Math.max(0, (scrollLeft / scrollWidth) * 100)) : 0;
       setScrollProgress(progress);
     }
   };
@@ -43,10 +46,25 @@ const ProductSlider = () => {
   useEffect(() => {
     const scrollElement = scrollRef.current;
     if (scrollElement) {
-      scrollElement.addEventListener('scroll', handleScroll);
-      return () => scrollElement.removeEventListener('scroll', handleScroll);
+      // Initial calculation
+      updateScrollProgress();
+      
+      // Add scroll listener
+      scrollElement.addEventListener('scroll', updateScrollProgress);
+      
+      // Add resize listener to recalculate on window resize
+      window.addEventListener('resize', updateScrollProgress);
+      
+      // Recalculate after images load
+      const timer = setTimeout(updateScrollProgress, 500);
+      
+      return () => {
+        scrollElement.removeEventListener('scroll', updateScrollProgress);
+        window.removeEventListener('resize', updateScrollProgress);
+        clearTimeout(timer);
+      };
     }
-  }, []);
+  }, [products]); // Re-run when products change
 
   const nextSlide = () => {
     if (!scrollRef.current) return;
@@ -59,21 +77,36 @@ const ProductSlider = () => {
   };
 
   const handleViewDetails = (product: Product) => {
-    // Navigate based on category
-    if (product.category === 'gemstone') {
-      navigate(`/gemstone/${product.id}`);
-    } else if (product.category === 'mala' || product.category === 'bracelet') {
+    console.log('Viewing details for:', product);
+    if (product.category.toLowerCase() === 'gemstone'||product.category.toLowerCase() === 'gemstones') {
+      navigate(`/gem-view/${product.id}`);
+    } else if (product.category.toLowerCase() === 'mala' || product.category === 'bracelet') {
       navigate(`/mala-brace-view/${product.id}`);
-    } else {
-      navigate(`/product/${product.id}`);
+    } else if (product.category.toLowerCase() === 'rudraksha' ){
+      navigate(`/rudra-view/${product.id}`);
+    }
+    else {
+      navigate(`/rudra-view/${product.id}`);
     }
   };
 
-  const handleAddToCart = (product: Product) => {
-    // Implement add to cart logic
-    console.log('Adding to cart:', product);
-    // You can dispatch to Redux or call your cart API here
-  };
+  const handleAddToCart = async (product: Product) => {
+      try {
+
+      const param:CartItem= {
+        productId: product.id,
+        quantity: 1
+      };
+      const isAdded = await addToCart(param);
+      if (isAdded){
+        toastSuccess("Item Successfully Added to cart")
+      }
+    } 
+    catch (error) {
+      toastError(error||"Failed To Add Product")
+    }
+
+    };
 
   const getProductImage = (product: Product) => {
     const baseUrl = import.meta.env.VITE_api_url || "http://localhost:5000";
@@ -83,7 +116,6 @@ const ProductSlider = () => {
     } else if (product.image) {
       return `${baseUrl}${product.image}`;
     }
-    // Fallback image
     return "";
   };
 
@@ -168,7 +200,7 @@ const ProductSlider = () => {
                   animation: 'gradient 3s ease infinite',
                 }}
               >
-                Special Offers
+                Diwali Sale
               </span>
             </h2>
             <Sparkles className="w-8 h-8 text-orange-500 animate-pulse" style={{ animationDelay: '0.5s' }} />
@@ -256,6 +288,7 @@ const ProductSlider = () => {
                       src={getProductImage(product)}
                       alt={product.name || 'Product'}
                       className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
+                      onLoad={updateScrollProgress}
                       onError={(e) => {
                         e.currentTarget.style.display = 'none';
                       }}
@@ -386,7 +419,7 @@ const ProductSlider = () => {
         </div>
       </div>
 
-      {/* <style>{`
+      <style>{`
         @keyframes gradient {
           0% {
             background-position: 0% 50%;
@@ -402,7 +435,7 @@ const ProductSlider = () => {
         .no-scrollbar::-webkit-scrollbar {
           display: none;
         }
-      `}</style> */}
+      `}</style>
     </section>
   );
 };

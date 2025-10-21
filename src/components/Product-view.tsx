@@ -190,7 +190,9 @@ const ProductDetailView: React.FC<Props> = ({ category = "gemstone" }) => {
     };
     fetchProduct();
   }, [params.id]);
-
+  React.useEffect(()=>{
+    window.scrollTo({top:0, behavior:"smooth"});
+  },[]);
   React.useEffect(() => {
     if (discountedPrice >= 0) {
       setTotalPrice(discountedPrice * quantity);

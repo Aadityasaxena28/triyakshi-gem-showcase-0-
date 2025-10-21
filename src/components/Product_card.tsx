@@ -102,7 +102,8 @@ const Product_card: React.FC<Props> = ({
   const discountedPrice = Math.round(
     product.price * (1 - 0.01 * discountPct)
   );
-
+  // console.log("Discounted Price:", product);
+console.log(category);
   const baseUrl = import.meta.env.VITE_api_url || "http://localhost:5000";
   let imageSrc = ""
   if (product.images && product.images[0]){

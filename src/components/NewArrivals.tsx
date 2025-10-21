@@ -1,6 +1,9 @@
+import { addToCart } from '@/API/Cart';
 import { getLatestProducts } from '@/API/Product';
 import { Button } from '@/components/ui/button';
+import { CartItem } from '@/DataTypes/CartData';
 import { Product } from '@/DataTypes/product';
+import { toastError, toastSuccess } from '@/utlity/AlertSystem';
 import { useQuery } from '@tanstack/react-query';
 import {
   ChevronLeft,
@@ -83,9 +86,23 @@ const NewArrivals = () => {
     }
   };
 
-  const handleAddToCart = (product: Product) => {
-    console.log('Adding to cart:', product);
-  };
+  const handleAddToCart = async (product: Product) => {
+        try {
+  
+        const param:CartItem= {
+          productId: product.id,
+          quantity: 1
+        };
+        const isAdded = await addToCart(param);
+        if (isAdded){
+          toastSuccess("Item Successfully Added to cart")
+        }
+      } 
+      catch (error) {
+        toastError(error||"Failed To Add Product")
+      }
+  
+      };
 
   const getProductImage = (product: Product) => {
     const baseUrl = import.meta.env.VITE_api_url || "http://localhost:5000";

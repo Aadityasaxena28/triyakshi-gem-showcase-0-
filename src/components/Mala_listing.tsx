@@ -218,7 +218,7 @@ const filteredProducts = useMemo(() => {
                       key={pid}
                       handleViewDetails={(id: string) => navigate(`/mala-brace-view/${id}`)}
                       product={product}
-                      category={cat || "mala"} // or lock to "mala" if you prefer
+                      category={"mala"} // or lock to "mala" if you prefer
                     />
                   );
                 })}

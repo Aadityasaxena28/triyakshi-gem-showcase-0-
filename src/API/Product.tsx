@@ -11,6 +11,7 @@ type GetProductsParams = {
 export async function getProducts({page=0,category="gemstone",type="all", productCount=40}:GetProductsParams):Promise<Product[]>{
 
   try {
+    // console.log("Fetching products with params:", {page, category, type, productCount});
     const { data } = await api.get<RawProduct[]>(`/api/products/products`,{
       params:{
         page,
@@ -23,7 +24,7 @@ export async function getProducts({page=0,category="gemstone",type="all", produc
       throw new Error("Failed to fetch products");
     }
     // const products:RawProduct[]= data.products;
-    console.log(data.data);
+    // console.log(data.data);
     return data.data.map(toProduct);
   } catch (error) {
     throw new Error("Failed to fetch products" + error);
@@ -63,7 +64,7 @@ export async function getLatestProducts({category="",type="",count=10}) {
     if(!data.success){
       throw new Error(data.error);
     }
-    console.log(data.data)
+    // console.log(data.data)
     return data.data.map(toProduct);
 
   } 
@@ -86,7 +87,7 @@ export async function getDiscountedProducts({category="",type="",count=10, disco
     if(!data.success){
       throw new Error(data.error||"Unable to load discounted products")
     }
-    console.log(data.data)
+    // console.log(data.data)
     return data.data.map(toProduct);
   } 
   catch (error) {
